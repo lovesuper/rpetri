@@ -24,5 +24,15 @@ AMinus = matrix(
     1, 0, 0, 0, 0, 0, 0, 0, 0, 0
   ), nrow=9, ncol=10, byrow=TRUE)
 
-conflictedTransitions = matrix(c( 0, 1, 1, 1, 0, 0, 0, 0, 0 ) , nrow=9, ncol=1, byrow=TRUE) 
-startingMarks = matrix(c( 1, 0, 1, 0, 1, 0, 1, 0, 0, 0), nrow=1, ncol=10, byrow=TRUE)
+conflictedTransitions = matrix(
+  c(0, 1, 1, 1, 0, 0, 0, 0, 0) ,
+  nrow = 9,
+  ncol = 1,
+  byrow = TRUE
+)
+startingMarks = matrix(
+  c(1, 0, 1, 0, 1, 0, 1, 0, 0, 0),
+  nrow = 1,
+  ncol = 10,
+  byrow = TRUE
+)
