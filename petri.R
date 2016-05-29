@@ -1,7 +1,7 @@
 #' Title
 #'
-#' @param currentState 
-#' @param inputFunc 
+#' @param currentState
+#' @param inputFunc
 #'
 #' @return
 #' @export
@@ -97,7 +97,7 @@ resolveConflicts <- function(method, nodes, iteration) {
   if (method == "weightRoundRobin") {
     return(weightRoundRobin(nodes, iteration))
   }
-  
+
   stop()
 }
 

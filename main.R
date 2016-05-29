@@ -3,10 +3,21 @@ source("balancing.R")
 source("petri.R")
 source("utils.R")
 
+numberOfTransitionsToPerform <- 50
 
+#' Title
+#'
+#' @param inputFunc 
+#' @param outputFunc 
+#' @param M 
+#' @param number 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 main <- function(inputFunc, outputFunc, M, number) {
-  
-  commonFunc <- outputFunc - inputFunc
+  commonFunc <- outputFunc - inputFunc    
   randomTime <- 0
   randomTime2 <- 0
   newTime <- 0
@@ -39,7 +50,7 @@ main <- function(inputFunc, outputFunc, M, number) {
   print(log)
 }
 
-
+main(APlus, AMinus, startingMarks, numberOfTransitionsToPerform)
 
 
 

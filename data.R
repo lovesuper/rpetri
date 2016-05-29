@@ -1,3 +1,4 @@
+# A+ function
 APlus = matrix(
   c(
     1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -11,6 +12,7 @@ APlus = matrix(
     0, 0, 0, 0, 0, 0, 0, 0, 0, 1
     ), nrow=9, ncol=10, byrow=TRUE)
 
+# A- function
 AMinus = matrix(
   c(
     0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -24,12 +26,15 @@ AMinus = matrix(
     1, 0, 0, 0, 0, 0, 0, 0, 0, 0
   ), nrow=9, ncol=10, byrow=TRUE)
 
+# Transitions that conflicted with each other
 conflictedTransitions = matrix(
   c(0, 1, 1, 1, 0, 0, 0, 0, 0) ,
   nrow = 9,
   ncol = 1,
   byrow = TRUE
 )
+
+# Started position of marks in the net
 startingMarks = matrix(
   c(1, 0, 1, 0, 1, 0, 1, 0, 0, 0),
   nrow = 1,
