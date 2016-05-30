@@ -313,7 +313,7 @@ main <- function(inputFunc, outputFunc, M, number) {
     startingVector <- createStartingVector(allowedTransitions)
     M <- t(startingVector) %*% commonFunc + M
   }
-  cat("[main] Result time: ", processTime)
+  cat("[main] Result time: ", processTime, "\n")
   print(logg)
 }
 
