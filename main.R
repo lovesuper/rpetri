@@ -1,6 +1,6 @@
 source("data.R")
 
-numberOfTransitionsToPerform <- 50
+numberOfTransitionsToPerform <- 7
 # A+ function
 APlus = matrix(
     c(
@@ -55,14 +55,14 @@ testRequestsWeights = matrix(
 
 pickRandom <- function(range) {
     colsCount <- length(range)
-    random1 <- rnd(colsCount)
+    random1 <- runif(1, 0, colsCount)
     index <- floor(random1)
-    return(range[index])
+    return(range[index + 1])
 }
 
 pickNext <- function(range, number) {
     index <- number %% length(range)
-    return(range[index])
+    return(range[index + 1])
 }
 
 pickByOrder <- function(orderedRange, number) {
@@ -85,7 +85,7 @@ roundRobin <- function(nodes, iteration) {
 
 randomBalancing <- function(conflicts) {
     return(
-        pickRandom(conficts)
+        pickRandom(conflicts)
     )
 }
 getNodesIds <- function(nodes) {
@@ -289,9 +289,8 @@ main <- function(inputFunc, outputFunc, M, number) {
   for (i in 1:number) {
     transposedVector <- t(M)
     allowedTransitions <- getAllowedTransitions(transposedVector, inputFunc)
-    cat("Allowed transitions: ", allowedTransitions, "\n")
-    transitionNumber <- getTransitionNumberWithResolving(allowedTransitions, i, "roundRobin")
-    cat("Transition number: ", transitionNumber, "\n")
+    transitionNumber <- getTransitionNumberWithResolving(allowedTransitions, i, "random")
+    cat("[Main] Transition number is: ", transitionNumber, "\n")
     if (ncol(logg) == 1 && allowedTransitions == conflictedTransitions) {
       nodes <- getNodesIds(allowedTransitions)
       logg <- matrix(0, 3, length(nodes))
@@ -301,9 +300,9 @@ main <- function(inputFunc, outputFunc, M, number) {
     }
 
     for (m in 1:ncol(logg)) {
-      cat("TEST\n")
-      print(logg[1, m])
-      print(transitionNumber)
+      if(i == 12) {
+          a <- 9
+      }
       if (logg[1, m] == transitionNumber) {
         logg[2, m] <- logg[2, m] + 1
         logg[3, m] <- logg[3, m] + 2 # ???
@@ -312,13 +311,10 @@ main <- function(inputFunc, outputFunc, M, number) {
     newProccesTime <- performTransition(transitionNumber, processTime)
     processTime <- newProccesTime
     startingVector <- createStartingVector(allowedTransitions)
-    cat("Starting vector: ", startingVector, "\n")
-    cat("Common func: ", commonFunc, "\n")
-    cat("M: ", M, "\n")
     M <- t(startingVector) %*% commonFunc + M
   }
-  #cat("[main] Result time: ", processTime)
-  #print(logg)
+  cat("[main] Result time: ", processTime)
+  print(logg)
 }
 
 main(APlus, AMinus, startingMarks, numberOfTransitionsToPerform)
