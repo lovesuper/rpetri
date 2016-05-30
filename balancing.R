@@ -1,3 +1,5 @@
+# Implementations of algorithms for load balancing
+
 pickRandom <- function(range) {
   colsCount <- ncol(range)
   random1 <- rnd(colsCount)
@@ -29,5 +31,7 @@ roundRobin <- function(nodes, iteration) {
 }
 
 randomBalancing <- function(conflicts) {
-  return(pickRandom(conficts))
+  return(
+      pickRandom(conficts)
+  )
 }

@@ -41,3 +41,10 @@ startingMarks = matrix(
   ncol = 10,
   byrow = TRUE
 )
+
+testRequestsWeights = matrix(
+    c(1, 3, 2, 5, 9, 3, 6, 4, 9, 7, 4, 8, 4, 9, 6, 3, 4, 2, 1, 1),
+    nrow = 1,
+    ncol = 20,
+    byrow = TRUE
+)

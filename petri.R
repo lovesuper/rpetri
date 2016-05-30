@@ -37,7 +37,7 @@ getAllowedTransitions <- function(currentState, inputFunc) {
 }
 
 createStartingVector <- function(vector) {
-  vectorLength <- len(vector)
+  vectorLength <- length(vector)
   startingVector <- 0
   q <- 1
   for (i in 1:vectorLength) {
@@ -50,11 +50,11 @@ createStartingVector <- function(vector) {
 }
 
 getTransactionNumber <- function(vector) {
-  vectorLength <- len(vector)
+  vectorLength <- length(vector)
   q <- 1
   for (i in 1:vectorLength) {
     if ((q * vector[i]) == 1) {
-      transitionNumber = i + 1
+      transitionNumber <- i + 1
     }
     if (vector[i] > 0) {
       q <- 0
@@ -64,17 +64,17 @@ getTransactionNumber <- function(vector) {
 }
 
 getEventTimeByLambda <- function(lambda, time) {
-  randomTime <- (-1 / lambda) * ln(1 - rnd(1))
+  randomTime <- (-1 / lambda) * log(1 - runif(1, 0, 1))
   return(time + randomTime)
 }
 
 analysEvents <- function(lambda, time1, time2) {
-  randomTime <- (-1 / lambda) * ln(1 - rnd(1))
+  randomTime <- (-1 / lambda) * log(1 - runif(1, 0, 1))
   maxTime <- max(time1, time2)
   return(maxTime + randomTime)
 }
 
-getSystemCharackteristics <- function(timeOnOutput, idleTime, time1, time2, deltaTime) {
+getSystemCharacteristics <- function(timeOnOutput, idleTime, time1, time2, deltaTime) {
   timeOnOutput <- timeOnOutput + deltaTime
   if (time1 >= time2) {
     time <- time1 - time2
@@ -91,7 +91,7 @@ resolveConflicts <- function(method, nodes, iteration) {
   }
 
   if (method == "roundRobin") {
-    return(roundRobin(nodes))
+    return(roundRobin(nodes, iteration))
   }
 
   if (method == "weightRoundRobin") {
@@ -103,26 +103,27 @@ resolveConflicts <- function(method, nodes, iteration) {
 
 getNodesIds <- function(nodes) {
   conflictedNodes <- c(0)
-  for (i in 1:len(nodes)) {
+  for (i in 1:length(nodes)) {
     if (nodes[i] == 1) {
       if (ncol(conflictedNodes) == 1 && conflictedNodes[0] == 0) {
         conflictedNodes[0] <- i + 1
         next()
       }
-    conflictedNodes <- conflictedNodes + v(i + 1)
+    conflictedNodes <- c(conflictedNodes, c(i + 1))
     }
   }
   return(conflictedNodes)
 }
 
 getTransitionNumberWithResolving <- function(nodes, iteration, method) {
-  vectorLength <- len(nodes)
+  vectorLength <- length(nodes)
   q <- 1
   if (nodes == conflictedTransitions) {
-    conflicedNodes <- getNodesIds(nodes)
-    transitionNumber <- resolveConflict(method, conflicedNodes, iteration)
+    conflictedNodes <- getNodesIds(nodes)
+    transitionNumber <- resolveConflict(method, conflictedNodes, iteration)
     return(transitionNumber)
   }
+
   for (i in 1:vectorLength) {
     if((q * nodes[i]) == 1) {
       transitionNumber <- i + 1
@@ -135,7 +136,7 @@ getTransitionNumberWithResolving <- function(nodes, iteration, method) {
 }
 
 getRandomTimeForLambda <- function(lambda) {
-  randomTime <- (-1/lambda) * ln(1 - rnd(1))
+  randomTime <- (-1/lambda) * log(1 - runif(1, 0, 1))
   return(randomTime)
 }
 
