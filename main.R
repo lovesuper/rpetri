@@ -1,6 +1,6 @@
 source("data.R")
 
-numberOfTransitionsToPerform <- 7
+numberOfTransitionsToPerform <- 100
 # A+ function
 APlus = matrix(
     c(
@@ -66,30 +66,26 @@ pickNext <- function(range, number) {
 }
 
 pickByOrder <- function(orderedRange, number) {
-    return(
-        pickNext(orderedRange, number)
-    )
+    return(pickNext(orderedRange, number))
 }
 
 weightRoundRobin <- function(nodes, iteration) {
-    return(
-        pickByOrder(nodes, iteration)
-    )
+    return(pickByOrder(nodes, iteration))
 }
 
 roundRobin <- function(nodes, iteration) {
-    return(
-        pickNext(nodes, iteration)
-    )
+    return(pickNext(nodes, iteration))
 }
 
 randomBalancing <- function(conflicts) {
-    return(
-        pickRandom(conflicts)
-    )
+    return(pickRandom(conflicts))
 }
+
 getNodesIds <- function(nodes) {
-    conflictedNodes <- matrix(c(0),nrow=1, ncol=1, byrow=TRUE)
+    conflictedNodes <- matrix(c(0),
+                              nrow = 1,
+                              ncol = 1,
+                              byrow = TRUE)
     for (i in 1:length(nodes)) {
         if (nodes[i] == 1) {
             if ((ncol(conflictedNodes) == 1) && (conflictedNodes[1] == 0)) {
@@ -115,14 +111,14 @@ getAllowedTransitions <- function(currentState, inputFunc) {
     transposedInputFunc <- t(inputFunc)
     rowsCount <- nrow(inputFunc)
     colsCount <- ncol(inputFunc)
-    transposedMatrix <- matrix(NA, nrow=9, ncol=10)
+    transposedMatrix <- matrix(NA, nrow = 9, ncol = 10)
     transitionIndicatorVector <- vector('integer')
     for (ig in 1:rowsCount) {
-        transposedMatrix[ig,] <- t(transposedInputFunc[,ig])
+        transposedMatrix[ig, ] <- t(transposedInputFunc[, ig])
     }
     allowedTransitions <- vector('integer')
     for (i in 1:rowsCount) {
-        transposedRow <- t(transposedMatrix[i,])
+        transposedRow <- t(transposedMatrix[i, ])
 
         transitionIndicatorVector[i] <- 0
         for (j in 1:colsCount) {
@@ -171,6 +167,7 @@ getEventTimeByLambda <- function(lambda, time) {
     return(time + randomTime)
 }
 
+
 analysEvents <- function(lambda, time1, time2) {
     randomTime <- (-1 / lambda) * log(1 - runif(1, 0, 1))
     maxTime <- max(time1, time2)
@@ -191,13 +188,9 @@ getSystemCharacteristics <- function(timeOnOutput, idleTime, time1, time2, delta
 resolveConflict <- function(method, nodes, iteration) {
     if (method == "random") {
         return(randomBalancing(nodes))
-    }
-
-    if (method == "roundRobin") {
+    } else if (method == "roundRobin") {
         return(roundRobin(nodes, iteration))
-    }
-
-    if (method == "weightRoundRobin") {
+    } else if (method == "weightRoundRobin") {
         return(weightRoundRobin(nodes, iteration))
     }
 
@@ -209,15 +202,16 @@ getTransitionNumberWithResolving <- function(nodes, iteration, method) {
     q <- 1
     if (all(nodes == conflictedTransitions)) {
         conflictedNodes <- getNodesIds(nodes)
-        transitionNumber <- resolveConflict(method, conflictedNodes, iteration)
+        transitionNumber <-
+            resolveConflict(method, conflictedNodes, iteration)
         return(transitionNumber)
     }
 
     for (i in 1:vectorLength) {
-        if((q * nodes[i]) == 1) {
+        if ((q * nodes[i]) == 1) {
             transitionNumber <- i
         }
-        if(nodes[i] > 0) {
+        if (nodes[i] > 0) {
             q <- 0
         }
     }
@@ -225,7 +219,7 @@ getTransitionNumberWithResolving <- function(nodes, iteration, method) {
 }
 
 getRandomTimeForLambda <- function(lambda) {
-    randomTime <- (-1/lambda) * log(1 - runif(1, 0, 1))
+    randomTime <- (-1 / lambda) * log(1 - runif(1, 0, 1))
     return(randomTime)
 }
 
@@ -239,29 +233,21 @@ performTransition <- function(transition, processTime) {
     transitionTime <- 0.0
     if (transition == 1) {
         lambda <- 0.1
-    }
-    if (transition == 2) {
+    } else if (transition == 2) {
         lambda <- 0.2
-    }
-    if (transition == 3) {
+    } else if (transition == 3) {
         lambda <- 0.3
-    }
-    if (transition == 4) {
+    } else if (transition == 4) {
         lambda <- 0.4
-    }
-    if (transition == 5) {
+    } else if (transition == 5) {
         lambda <- 0.5
-    }
-    if (transition == 6) {
+    } else if (transition == 6) {
         lambda <- 0.6
-    }
-    if (transition == 7) {
+    } else if (transition == 7) {
         lambda <- 0.7
-    }
-    if (transition == 8) {
+    } else if (transition == 8) {
         lambda <- 0.8
-    }
-    if (transition == 9) {
+    } else if (transition == 9) {
         lambda <- 0.9
     }
     transitionTime <- getRandomTimeForLambda(lambda)
@@ -280,41 +266,71 @@ performTransition <- function(transition, processTime) {
 #'
 #' @examples
 main <- function(inputFunc, outputFunc, M, number) {
-  commonFunc <- outputFunc - inputFunc
-  randomTime <- 0
-  randomTime2 <- 0
-  newTime <- 0
-  logg <- matrix(c(0,0,0),nrow=3, ncol=1, byrow=TRUE)
-  processTime <- 0.0
-  for (i in 1:number) {
-    transposedVector <- t(M)
-    allowedTransitions <- getAllowedTransitions(transposedVector, inputFunc)
-    transitionNumber <- getTransitionNumberWithResolving(allowedTransitions, i, "random")
-    cat("[Main] Transition number is: ", transitionNumber, "\n")
-    if (ncol(logg) == 1 && allowedTransitions == conflictedTransitions) {
-      nodes <- getNodesIds(allowedTransitions)
-      logg <- matrix(0, 3, length(nodes))
-      for (k in 1:length(nodes)) {
-        logg[1,k] <- t(nodes)[k]
-      }
-    }
+    commonFunc <- outputFunc - inputFunc
+    randomTime <- 0
+    randomTime2 <- 0
+    newTime <- 0
+    tasksCount <- 0
+    logg <- matrix(c(0, 0, 0),
+                   nrow = 3,
+                   ncol = 1,
+                   byrow = TRUE)
+    processTime <- 0.0
+    for (i in 1:number) {
+        transposedVector <- t(M)
+        allowedTransitions <-
+            getAllowedTransitions(transposedVector, inputFunc)
+        transitionNumber <-
+            getTransitionNumberWithResolving(allowedTransitions, i, "random")
+        cat("[Main] Transition number is: ", transitionNumber, "\n")
+        if (ncol(logg) == 1 &&
+            allowedTransitions == conflictedTransitions) {
+            nodes <- getNodesIds(allowedTransitions)
+            logg <- matrix(0, 3, length(nodes))
+            for (k in 1:length(nodes)) {
+                logg[1, k] <- t(nodes)[k]
+            }
+        }
 
-    for (m in 1:ncol(logg)) {
-      if (logg[1, m] == transitionNumber) {
-        logg[2, m] <- logg[2, m] + 1
-        logg[3, m] <- logg[3, m] + 2 # ???
-      }
+        for (m in 1:ncol(logg)) {
+            if (logg[1, m] == transitionNumber) {
+                tasksCount <- tasksCount + 1
+                cat("task number: ", tasksCount)
+                logg[2, m] <- logg[2, m] + 1
+                logg[3, m] <- logg[3, m] + testRequestsWeights[tasksCount %% length(testRequestsWeights) + 1]
+            }
+        }
+
+        newProccesTime <-
+            performTransition(transitionNumber, processTime)
+        processTime <- newProccesTime
+        startingVector <- createStartingVector(allowedTransitions)
+        M <- t(startingVector) %*% commonFunc + M
     }
-    newProccesTime <- performTransition(transitionNumber, processTime)
-    processTime <- newProccesTime
-    startingVector <- createStartingVector(allowedTransitions)
-    M <- t(startingVector) %*% commonFunc + M
-  }
-  cat("[main] Result time: ", processTime, "\n")
-  print(logg)
+    cat("[main] Result time: ", processTime, "\n")
+    print(logg)
 }
 
 main(APlus, AMinus, startingMarks, numberOfTransitionsToPerform)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
