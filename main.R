@@ -300,9 +300,6 @@ main <- function(inputFunc, outputFunc, M, number) {
     }
 
     for (m in 1:ncol(logg)) {
-      if(i == 12) {
-          a <- 9
-      }
       if (logg[1, m] == transitionNumber) {
         logg[2, m] <- logg[2, m] + 1
         logg[3, m] <- logg[3, m] + 2 # ???
