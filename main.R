@@ -1,5 +1,3 @@
-source("data.R")
-
 numberOfTransitionsToPerform <- 100
 # A+ function
 APlus = matrix(
@@ -167,7 +165,6 @@ getEventTimeByLambda <- function(lambda, time) {
     return(time + randomTime)
 }
 
-
 analysEvents <- function(lambda, time1, time2) {
     randomTime <- (-1 / lambda) * log(1 - runif(1, 0, 1))
     maxTime <- max(time1, time2)
@@ -228,18 +225,23 @@ getTransitionTime <- function(currentTime, lambda) {
     return(time)
 }
 
-performTransition <- function(transition, processTime) {
+performTransition <- function(transition, processTime, taskWeight) {
     lambda <- 0.1
     transitionTime <- 0.0
     if (transition == 1) {
+        # Starting transition
         lambda <- 0.1
     } else if (transition == 2) {
-        lambda <- 0.2
+        # First node
+        lambda <- 0.2 * taskWeight
     } else if (transition == 3) {
-        lambda <- 0.3
+        # Second node
+        lambda <- 0.3 * taskWeight
     } else if (transition == 4) {
-        lambda <- 0.4
+        # Third node
+        lambda <- 0.4 * taskWeight
     } else if (transition == 5) {
+        #
         lambda <- 0.5
     } else if (transition == 6) {
         lambda <- 0.6
@@ -250,31 +252,27 @@ performTransition <- function(transition, processTime) {
     } else if (transition == 9) {
         lambda <- 0.9
     }
-    transitionTime <- getRandomTimeForLambda(lambda)
+    # transitionTime <- getRandomTimeForLambda(lambda)
+    transitionTime <- lambda
     return(processTime + transitionTime)
 }
 
-#' Title
+#' Main function for experiment
 #'
-#' @param inputFunc
-#' @param outputFunc
-#' @param M
-#' @param number
+#' @param inputFunc is param for A+
+#' @param outputFunc is param for A-
+#' @param M is starting marking
+#' @param number is count of transitions to perform
+#' @param taskNumber is count of tasks to be done
 #'
 #' @return
 #' @export
 #'
 #' @examples
-main <- function(inputFunc, outputFunc, M, number) {
+main <- function(inputFunc, outputFunc, M, number, taskNumber) {
     commonFunc <- outputFunc - inputFunc
-    randomTime <- 0
-    randomTime2 <- 0
-    newTime <- 0
     tasksCount <- 0
-    logg <- matrix(c(0, 0, 0),
-                   nrow = 3,
-                   ncol = 1,
-                   byrow = TRUE)
+    logg <- matrix(c(0, 0, 0), nrow = 3, ncol = 1, byrow = TRUE)
     processTime <- 0.0
     for (i in 1:number) {
         transposedVector <- t(M)
@@ -283,8 +281,7 @@ main <- function(inputFunc, outputFunc, M, number) {
         transitionNumber <-
             getTransitionNumberWithResolving(allowedTransitions, i, "random")
         cat("[Main] Transition number is: ", transitionNumber, "\n")
-        if (ncol(logg) == 1 &&
-            allowedTransitions == conflictedTransitions) {
+        if (ncol(logg) == 1 && allowedTransitions == conflictedTransitions) {
             nodes <- getNodesIds(allowedTransitions)
             logg <- matrix(0, 3, length(nodes))
             for (k in 1:length(nodes)) {
@@ -294,24 +291,29 @@ main <- function(inputFunc, outputFunc, M, number) {
 
         for (m in 1:ncol(logg)) {
             if (logg[1, m] == transitionNumber) {
+                currentTaskWeight <- testRequestsWeights[tasksCount %% length(testRequestsWeights) + 1]
                 tasksCount <- tasksCount + 1
-                cat("task number: ", tasksCount)
+                cat("task number: ", tasksCount, "\n")
                 logg[2, m] <- logg[2, m] + 1
-                logg[3, m] <- logg[3, m] + testRequestsWeights[tasksCount %% length(testRequestsWeights) + 1]
+                logg[3, m] <- logg[3, m] + currentTaskWeight
             }
         }
 
-        newProccesTime <-
-            performTransition(transitionNumber, processTime)
+        newProccesTime <- performTransition(transitionNumber, processTime, currentTaskWeight)
         processTime <- newProccesTime
         startingVector <- createStartingVector(allowedTransitions)
         M <- t(startingVector) %*% commonFunc + M
+        if (taskNumber > 0 && tasksCount == taskNumber) {
+            cat("Tasks are closed")
+            break()
+        }
+
     }
     cat("[main] Result time: ", processTime, "\n")
     print(logg)
 }
 
-main(APlus, AMinus, startingMarks, numberOfTransitionsToPerform)
+main(APlus, AMinus, startingMarks, numberOfTransitionsToPerform, 11)
 
 
 
