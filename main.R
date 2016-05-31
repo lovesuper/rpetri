@@ -233,13 +233,13 @@ performTransition <- function(transition, processTime, taskWeight) {
         lambda <- 0.1
     } else if (transition == 2) {
         # First node
-        lambda <- 0.2 * taskWeight
+        lambda <- 0.7 * taskWeight
     } else if (transition == 3) {
         # Second node
-        lambda <- 0.3 * taskWeight
+        lambda <- 0.5 * taskWeight
     } else if (transition == 4) {
         # Third node
-        lambda <- 0.4 * taskWeight
+        lambda <- 0.2 * taskWeight
     } else if (transition == 5) {
         #
         lambda <- 0.5
@@ -276,11 +276,9 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
     processTime <- 0.0
     for (i in 1:number) {
         transposedVector <- t(M)
-        allowedTransitions <-
-            getAllowedTransitions(transposedVector, inputFunc)
-        transitionNumber <-
-            getTransitionNumberWithResolving(allowedTransitions, i, "random")
-        cat("[Main] Transition number is: ", transitionNumber, "\n")
+        allowedTransitions <- getAllowedTransitions(transposedVector, inputFunc)
+        transitionNumber <- getTransitionNumberWithResolving(allowedTransitions, i, "roundRobin")
+        cat("[main] Transition number is: ", transitionNumber, "\n")
         if (ncol(logg) == 1 && allowedTransitions == conflictedTransitions) {
             nodes <- getNodesIds(allowedTransitions)
             logg <- matrix(0, 3, length(nodes))
@@ -293,7 +291,7 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
             if (logg[1, m] == transitionNumber) {
                 currentTaskWeight <- testRequestsWeights[tasksCount %% length(testRequestsWeights) + 1]
                 tasksCount <- tasksCount + 1
-                cat("task number: ", tasksCount, "\n")
+                cat("[main] Task number: ", tasksCount, "\n")
                 logg[2, m] <- logg[2, m] + 1
                 logg[3, m] <- logg[3, m] + currentTaskWeight
             }
@@ -304,12 +302,13 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
         startingVector <- createStartingVector(allowedTransitions)
         M <- t(startingVector) %*% commonFunc + M
         if (taskNumber > 0 && tasksCount == taskNumber) {
-            cat("Tasks are closed")
+            cat("[main] Tasks are closed")
             break()
         }
 
     }
     cat("[main] Result time: ", processTime, "\n")
+    rownames(logg) <- c("Transition", "Tasks count", "Loading")
     print(logg)
 }
 
