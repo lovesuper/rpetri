@@ -302,7 +302,7 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
         startingVector <- createStartingVector(allowedTransitions)
         M <- t(startingVector) %*% commonFunc + M
         if (taskNumber > 0 && tasksCount == taskNumber) {
-            cat("[main] Tasks are closed")
+            cat("[main] Tasks are closed\n")
             break()
         }
 
