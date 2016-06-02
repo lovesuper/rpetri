@@ -277,7 +277,7 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
     for (i in 1:number) {
         transposedVector <- t(M)
         allowedTransitions <- getAllowedTransitions(transposedVector, inputFunc)
-        transitionNumber <- getTransitionNumberWithResolving(allowedTransitions, i, "roundRobin")
+        transitionNumber <- getTransitionNumberWithResolving(allowedTransitions, i, "random")
         cat("[main] Transition number is: ", transitionNumber, "\n")
         if (ncol(logg) == 1 && allowedTransitions == conflictedTransitions) {
             nodes <- getNodesIds(allowedTransitions)
@@ -310,6 +310,7 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
     cat("[main] Result time: ", processTime, "\n")
     rownames(logg) <- c("Transition", "Tasks count", "Loading")
     print(logg)
+    hist(logg)
 }
 
 main(APlus, AMinus, startingMarks, numberOfTransitionsToPerform, 11)
