@@ -1,6 +1,8 @@
-numberOfTransitionsToPerform <- 1000
 library(devtools)
-source_url("https://raw.githubusercontent.com/ggrothendieck/gsubfn/master/R/list.R")
+
+source_url(
+    "https://raw.githubusercontent.com/ggrothendieck/gsubfn/master/R/list.R"
+)
 
 # A+ function
 APlus = matrix(
@@ -336,8 +338,8 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
             cat("[main] Tasks are closed\n")
             break()
         }
-
     }
+
     cat("[main] Result time: ", processTime, "\n")
     rownames(performanceLog) <- c("Transition", "Tasks count", "Loading")
     print(performanceLog)
@@ -381,12 +383,12 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
     # (cex) and uses the same line colors and points used by
     # the actual plots
     legend(1, g_range[2], c("firstNode","secondNode"), cex=0.8, col=c("blue","red"), pch=21:22, lty=1:2);
-
-
-
 }
 
-main(APlus, AMinus, startingMarks, numberOfTransitionsToPerform, 30)
+numberOfTransitionsToPerform <- 1000
+taskNumber <- 30
+
+main(APlus, AMinus, startingMarks, numberOfTransitionsToPerform, taskNumber)
 
 
 
