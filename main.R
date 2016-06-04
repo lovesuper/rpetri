@@ -1,4 +1,7 @@
-numberOfTransitionsToPerform <- 100
+numberOfTransitionsToPerform <- 1000
+library(devtools)
+source_url("https://raw.githubusercontent.com/ggrothendieck/gsubfn/master/R/list.R")
+
 # A+ function
 APlus = matrix(
     c(
@@ -225,7 +228,7 @@ getTransitionTime <- function(currentTime, lambda) {
     return(time)
 }
 
-performTransition <- function(transition, processTime, taskWeight) {
+performTransition <- function(transition, processTime, taskWeight, detailedPerformanceLog) {
     lambda <- 0.1
     transitionTime <- 0.0
     if (transition == 1) {
@@ -234,12 +237,21 @@ performTransition <- function(transition, processTime, taskWeight) {
     } else if (transition == 2) {
         # First node
         lambda <- 0.7 * taskWeight
+        detailedPerformanceLog[[transition - 1]] <- c(
+            detailedPerformanceLog[[transition - 1]], c(lambda)
+        )
     } else if (transition == 3) {
         # Second node
         lambda <- 0.5 * taskWeight
+        detailedPerformanceLog[[transition - 1]] <- c(
+            detailedPerformanceLog[[transition - 1]], c(lambda)
+        )
     } else if (transition == 4) {
         # Third node
         lambda <- 0.2 * taskWeight
+        detailedPerformanceLog[[transition - 1]] <- c(
+            detailedPerformanceLog[[transition - 1]], c(lambda)
+        )
     } else if (transition == 5) {
         #
         lambda <- 0.5
@@ -254,7 +266,17 @@ performTransition <- function(transition, processTime, taskWeight) {
     }
     # transitionTime <- getRandomTimeForLambda(lambda)
     transitionTime <- lambda
-    return(processTime + transitionTime)
+    processTime <- processTime + transitionTime
+    return(list(processTime, detailedPerformanceLog))
+}
+
+createStatsMatrix <- function(headerVector) {
+    nodes <- getNodesIds(headerVector)
+    statsMatrix <- matrix(0, 3, length(nodes))
+    for (k in 1:length(nodes)) {
+        statsMatrix[1, k] <- t(nodes)[k]
+    }
+    return(statsMatrix)
 }
 
 #' Main function for experiment
@@ -272,32 +294,41 @@ performTransition <- function(transition, processTime, taskWeight) {
 main <- function(inputFunc, outputFunc, M, number, taskNumber) {
     commonFunc <- outputFunc - inputFunc
     tasksCount <- 0
-    logg <- matrix(c(0, 0, 0), nrow = 3, ncol = 1, byrow = TRUE)
+
+    # Summary performance log for every processing unit
+    performanceLog <- matrix(c(0, 0, 0), nrow = 3, ncol = 1, byrow = TRUE)
+
+    # Detailed Performance Log for every processing unit
+    array(1:24, c(2,4,3))
+    detailedPerformanceLog <- list(c(), c(), c())
     processTime <- 0.0
     for (i in 1:number) {
         transposedVector <- t(M)
         allowedTransitions <- getAllowedTransitions(transposedVector, inputFunc)
         transitionNumber <- getTransitionNumberWithResolving(allowedTransitions, i, "random")
         cat("[main] Transition number is: ", transitionNumber, "\n")
-        if (ncol(logg) == 1 && allowedTransitions == conflictedTransitions) {
-            nodes <- getNodesIds(allowedTransitions)
-            logg <- matrix(0, 3, length(nodes))
-            for (k in 1:length(nodes)) {
-                logg[1, k] <- t(nodes)[k]
-            }
+
+        # Creating matrix for results
+        if (ncol(performanceLog) == 1 && allowedTransitions == conflictedTransitions) {
+            performanceLog = createStatsMatrix(allowedTransitions)
         }
 
-        for (m in 1:ncol(logg)) {
-            if (logg[1, m] == transitionNumber) {
+        for (m in 1:ncol(performanceLog)) {
+            if (performanceLog[1, m] == transitionNumber) {
                 currentTaskWeight <- testRequestsWeights[tasksCount %% length(testRequestsWeights) + 1]
                 tasksCount <- tasksCount + 1
                 cat("[main] Task number: ", tasksCount, "\n")
-                logg[2, m] <- logg[2, m] + 1
-                logg[3, m] <- logg[3, m] + currentTaskWeight
+                # Counting tasks amount
+                performanceLog[2, m] <- performanceLog[2, m] + 1
+                # Counting weight of tasks
+                performanceLog[3, m] <- performanceLog[3, m] + currentTaskWeight
             }
         }
 
-        newProccesTime <- performTransition(transitionNumber, processTime, currentTaskWeight)
+        list[newProccesTime, detailedPerformanceLog] <- performTransition(
+            transitionNumber, processTime, currentTaskWeight, detailedPerformanceLog
+        )
+
         processTime <- newProccesTime
         startingVector <- createStartingVector(allowedTransitions)
         M <- t(startingVector) %*% commonFunc + M
@@ -308,22 +339,54 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
 
     }
     cat("[main] Result time: ", processTime, "\n")
-    rownames(logg) <- c("Transition", "Tasks count", "Loading")
-    print(logg)
-    hist(logg)
+    rownames(performanceLog) <- c("Transition", "Tasks count", "Loading")
+    print(performanceLog)
+
+    firstNode <- detailedPerformanceLog[[1]]
+    secondNode <- detailedPerformanceLog[[2]]
+    thirdNode <- detailedPerformanceLog[[3]]
+
+    cat("Node 1 tasks average time: ", mean(firstNode), "\n")
+    cat("Node 1 tasks median time: ", median(firstNode), "\n")
+    cat("Node 2 tasks average time: ", mean(secondNode), "\n")
+    cat("Node 3 tasks average time: ", mean(thirdNode), "\n")
+    # Calculate range from 0 to max value of cars and trucks
+    g_range <- range(0, firstNode, secondNode)
+    # Graph autos using y axis that ranges from 0 to max
+    # value in cars or trucks vector.  Turn off axes and
+    # annotations (axis labels) so we can specify them ourself
+    plot(firstNode, type="o", col="blue", ylim=g_range,  axes=FALSE, ann=FALSE)
+
+    # Make x axis using Mon-Fri labels
+    axis(1, at=1:5, lab=c("Mon","Tue","Wed","Thu","Fri"))
+
+    # Make y axis with horizontal labels that display ticks at
+    # every 4 marks. 4*0:g_range[2] is equivalent to c(0,4,8,12).
+    axis(2, las=1, at=4*0:g_range[2])
+
+    # Create box around plot
+    box()
+
+    # Graph trucks with red dashed line and square points
+    lines(secondNode, type="o", pch=22, lty=2, col="red")
+
+    # Create a title with a red, bold/italic font
+    title(main="Test 1", col.main="red", font.main=4)
+
+    # Label the x and y axes with dark green text
+    title(xlab="Days", col.lab=rgb(0,0.5,0))
+    title(ylab="Total", col.lab=rgb(0,0.5,0))
+
+    # Create a legend at (1, g_range[2]) that is slightly smaller
+    # (cex) and uses the same line colors and points used by
+    # the actual plots
+    legend(1, g_range[2], c("firstNode","secondNode"), cex=0.8, col=c("blue","red"), pch=21:22, lty=1:2);
+
+
+
 }
 
-main(APlus, AMinus, startingMarks, numberOfTransitionsToPerform, 11)
-
-
-
-
-
-
-
-
-
-
+main(APlus, AMinus, startingMarks, numberOfTransitionsToPerform, 30)
 
 
 
