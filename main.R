@@ -1,8 +1,18 @@
-library(devtools)
+#https://raw.githubusercontent.com/ggrothendieck/gsubfn/master/R/list.R
 
-source_url(
-    "https://raw.githubusercontent.com/ggrothendieck/gsubfn/master/R/list.R"
-)
+list <- structure(NA, class = "result")
+"[<-.result" <- function(x, ..., value) {
+    args <- as.list(match.call())
+    args <- args[-c(1:2, length(args))]
+    length(value) <- length(args)
+    for (i in seq(along = args)) {
+        a <- args[[i]]
+        if (!missing(a))
+            eval.parent(substitute(a <- v, list(a = a, v = value[[i]])))
+    }
+    x
+}
+# imported funtions end
 
 # A+ function
 APlus = matrix(
@@ -230,47 +240,45 @@ getTransitionTime <- function(currentTime, lambda) {
     return(time)
 }
 
-performTransition <- function(transition, processTime, taskWeight, detailedPerformanceLog) {
-    lambda <- 0.1
-    transitionTime <- 0.0
-    if (transition == 1) {
-        # Starting transition
+performTransition <-
+    function(transition,
+             processTime,
+             taskWeight,
+             detailedPerformanceLog) {
         lambda <- 0.1
-    } else if (transition == 2) {
-        # First node
-        lambda <- 0.7 * taskWeight
-        detailedPerformanceLog[[transition - 1]] <- c(
-            detailedPerformanceLog[[transition - 1]], c(lambda)
-        )
-    } else if (transition == 3) {
-        # Second node
-        lambda <- 0.5 * taskWeight
-        detailedPerformanceLog[[transition - 1]] <- c(
-            detailedPerformanceLog[[transition - 1]], c(lambda)
-        )
-    } else if (transition == 4) {
-        # Third node
-        lambda <- 0.2 * taskWeight
-        detailedPerformanceLog[[transition - 1]] <- c(
-            detailedPerformanceLog[[transition - 1]], c(lambda)
-        )
-    } else if (transition == 5) {
-        #
-        lambda <- 0.5
-    } else if (transition == 6) {
-        lambda <- 0.6
-    } else if (transition == 7) {
-        lambda <- 0.7
-    } else if (transition == 8) {
-        lambda <- 0.8
-    } else if (transition == 9) {
-        lambda <- 0.9
+        transitionTime <- 0.0
+        if (transition == 1) {
+            # Starting transition
+            lambda <- 0.1
+        } else if (transition == 2) {
+            # First node
+            lambda <- 0.7 * taskWeight
+            detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
+        } else if (transition == 3) {
+            # Second node
+            lambda <- 0.5 * taskWeight
+            detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
+        } else if (transition == 4) {
+            # Third node
+            lambda <- 0.2 * taskWeight
+            detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
+        } else if (transition == 5) {
+            #
+            lambda <- 0.5
+        } else if (transition == 6) {
+            lambda <- 0.6
+        } else if (transition == 7) {
+            lambda <- 0.7
+        } else if (transition == 8) {
+            lambda <- 0.8
+        } else if (transition == 9) {
+            lambda <- 0.9
+        }
+        transitionTime <- getRandomTimeForLambda(lambda)
+        #transitionTime <- lambda
+        processTime <- processTime + transitionTime
+        return(list(processTime, detailedPerformanceLog))
     }
-    transitionTime <- getRandomTimeForLambda(lambda)
-    #transitionTime <- lambda
-    processTime <- processTime + transitionTime
-    return(list(processTime, detailedPerformanceLog))
-}
 
 createStatsMatrix <- function(headerVector) {
     nodes <- getNodesIds(headerVector)
@@ -281,87 +289,7 @@ createStatsMatrix <- function(headerVector) {
     return(statsMatrix)
 }
 
-#' Main function for experiment
-#'
-#' @param inputFunc is param for A+
-#' @param outputFunc is param for A-
-#' @param M is starting marking
-#' @param number is count of transitions to perform
-#' @param taskNumber is count of tasks to be done
-#'
-#' @return
-#' @export
-#'
-#' @examples
-main <- function(inputFunc, outputFunc, M, number, taskNumber) {
-    commonFunc <- outputFunc - inputFunc
-    tasksCount <- 0
-
-    # Summary performance log for every processing unit
-    performanceLog <- matrix(c(0, 0, 0), nrow = 3, ncol = 1, byrow = TRUE)
-
-    # Detailed Performance Log for every processing unit
-    array(1:24, c(2,4,3))
-    detailedPerformanceLog <- list(c(), c(), c())
-    processLogForEveryTask <- c()
-    processTime <- 0.0
-    timeForCycle <- 0.0
-    for (i in 1:number) {
-        transposedVector <- t(M)
-        allowedTransitions <- getAllowedTransitions(transposedVector, inputFunc)
-        transitionNumber <- getTransitionNumberWithResolving(allowedTransitions, i, "random")
-        cat("[main] Transition number is: ", transitionNumber, "\n")
-
-        # Creating matrix for results
-        if (ncol(performanceLog) == 1 && allowedTransitions == conflictedTransitions) {
-            performanceLog = createStatsMatrix(allowedTransitions)
-        }
-
-        for (m in 1:ncol(performanceLog)) {
-            if (performanceLog[1, m] == transitionNumber) {
-                currentTaskWeight <- testRequestsWeights[tasksCount %% length(testRequestsWeights) + 1]
-                tasksCount <- tasksCount + 1
-                cat("[main] Task number: ", tasksCount, "\n")
-                # Counting tasks amount
-                performanceLog[2, m] <- performanceLog[2, m] + 1
-                # Counting weight of tasks
-                performanceLog[3, m] <- performanceLog[3, m] + currentTaskWeight
-            }
-        }
-        newProccesTime <- 0.0
-        list[newProccesTime, detailedPerformanceLog] <- performTransition(
-            transitionNumber, timeForCycle, currentTaskWeight, detailedPerformanceLog
-        )
-
-        timeForCycle <- newProccesTime
-        startingVector <- createStartingVector(allowedTransitions)
-        if (transitionNumber == 9) {
-            cat("[main] Time for this loop is: ", timeForCycle, "\n")
-            processLogForEveryTask <- c(processLogForEveryTask, c(timeForCycle))
-            processTime <- processTime + timeForCycle
-            timeForCycle <- 0.0
-        }
-
-        M <- t(startingVector) %*% commonFunc + M
-        if (taskNumber > 0 && tasksCount == taskNumber) {
-            cat("[main] Tasks are closed\n")
-            break()
-        }
-    }
-
-    cat("[main] Result time: ", processTime, "\n")
-    rownames(performanceLog) <- c("Transition", "Tasks count", "Loading")
-    print(performanceLog)
-
-    firstNode <- detailedPerformanceLog[[1]]
-    secondNode <- detailedPerformanceLog[[2]]
-    thirdNode <- detailedPerformanceLog[[3]]
-
-    cat("Node 1 tasks average time: ", mean(firstNode), "\n")
-    cat("Node 1 tasks median time: ", median(firstNode), "\n")
-    cat("Node 2 tasks average time: ", mean(secondNode), "\n")
-    cat("Node 3 tasks average time: ", mean(thirdNode), "\n")
-
+makeAPlot <- function(firstNode, secondNode) {
     # Calculate range from 0 to max value of cars and trucks
     g_range <- range(0, firstNode, secondNode)
     # Graph autos using y axis that ranges from 0 to max
@@ -419,16 +347,106 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
         lty = 1:2
     )
 
-    cat("Average time of processing task in whole system:",
+}
+
+#' Main function for experiment
+#'
+#' @param inputFunc is param for A+
+#' @param outputFunc is param for A-
+#' @param M is starting marking
+#' @param number is count of transitions to perform
+#' @param taskNumber is count of tasks to be done
+#'
+#' @return
+#' @export
+#'
+#' @examples
+main <- function(inputFunc, outputFunc, M, number, taskNumber) {
+    commonFunc <- outputFunc - inputFunc
+    tasksCount <- 0
+
+    # Summary performance log for every processing unit
+    performanceLog <- matrix(c(0, 0, 0), nrow = 3, ncol = 1, byrow = TRUE)
+
+    # Detailed Performance Log for every processing unit
+    array(1:24, c(2,4,3))
+    detailedPerformanceLog <- list(c(), c(), c())
+    processLogForEveryTask <- c()
+    processTime <- 0.0
+    timeForCycle <- 0.0
+    for (i in 1:number) {
+        transposedVector <- t(M)
+        allowedTransitions <- getAllowedTransitions(transposedVector, inputFunc)
+        transitionNumber <- getTransitionNumberWithResolving(allowedTransitions, i, "random")
+        #cat("[main] Transition number is: ", transitionNumber, "\n")
+
+        # Creating matrix for results
+        if (ncol(performanceLog) == 1 && allowedTransitions == conflictedTransitions) {
+            performanceLog = createStatsMatrix(allowedTransitions)
+        }
+
+        for (m in 1:ncol(performanceLog)) {
+            if (performanceLog[1, m] == transitionNumber) {
+                currentTaskWeight <- testRequestsWeights[tasksCount %% length(testRequestsWeights) + 1]
+                tasksCount <- tasksCount + 1
+                #cat("[main] Task number: ", tasksCount, "\n")
+                # Counting tasks amount
+                performanceLog[2, m] <- performanceLog[2, m] + 1
+                # Counting weight of tasks
+                performanceLog[3, m] <- performanceLog[3, m] + currentTaskWeight
+            }
+        }
+        newProccesTime <- 0.0
+        list[newProccesTime, detailedPerformanceLog] <- performTransition(
+            transitionNumber, timeForCycle, currentTaskWeight, detailedPerformanceLog
+        )
+
+        timeForCycle <- newProccesTime
+        startingVector <- createStartingVector(allowedTransitions)
+        if (transitionNumber == 9) {
+            #cat("[main] Time for this loop is: ", timeForCycle, "\n")
+            processLogForEveryTask <- c(processLogForEveryTask, c(timeForCycle))
+            processTime <- processTime + timeForCycle
+            timeForCycle <- 0.0
+        }
+
+        M <- t(startingVector) %*% commonFunc + M
+        if (taskNumber > 0 && tasksCount == taskNumber) {
+            #cat("[main] Tasks are closed\n")
+            break()
+        }
+    }
+
+    cat("[Results] Result time: ", processTime, "\n")
+    rownames(performanceLog) <- c("Transition", "Tasks count", "Loading")
+    print(performanceLog)
+
+    firstNode <- detailedPerformanceLog[[1]]
+    secondNode <- detailedPerformanceLog[[2]]
+    thirdNode <- detailedPerformanceLog[[3]]
+
+    cat("[Results] Node 1 tasks average time: ", mean(firstNode), "\n")
+    cat("[Results] Node 1 tasks median time: ", median(firstNode), "\n")
+    cat("[Results] Node 2 tasks average time: ", mean(secondNode), "\n")
+    cat("[Results] Node 3 tasks average time: ", mean(thirdNode), "\n")
+    cat(
+        "[Results] Average time of processing task in whole system:",
         mean(processLogForEveryTask),
-        "\n")
+        "\n"
+    )
+
+    makeAPlot(firstNode, secondNode)
 }
 
 inputDistribution <- "hola!" # implement mech of input distribution
 numberOfTransitionsToPerform <- 1000
 taskNumber <- 30
 
-main(APlus, AMinus, startingMarks, numberOfTransitionsToPerform, taskNumber)
+main(APlus,
+     AMinus,
+     startingMarks,
+     numberOfTransitionsToPerform,
+     taskNumber)
 
 
 
