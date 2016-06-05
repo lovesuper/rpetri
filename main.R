@@ -1,6 +1,16 @@
 #https://raw.githubusercontent.com/ggrothendieck/gsubfn/master/R/list.R
 
 list <- structure(NA, class = "result")
+#' Title
+#'
+#' @param x
+#' @param ...
+#' @param value
+#'
+#' @return
+#' @export
+#'
+#' @examples
 "[<-.result" <- function(x, ..., value) {
     args <- as.list(match.call())
     args <- args[-c(1:2, length(args))]
@@ -64,36 +74,124 @@ testRequestsWeights = matrix(
     byrow = TRUE
 )
 
+
 # Implementations of algorithms for load balancing
 
+# Last succesful connectoin algorithm
+#' Title
+#'
+#' @return
+#' @export
+#'
+#' @examples
+pickLastSuccessfulNode <- function() {
+
+}
+
+# Dynamic Weight Round Robin algorithm
+#' Title
+#'
+#' @return
+#' @export
+#'
+#' @examples
+dynamicWeightAlgorithm <- function() {
+
+}
+
+# Random algorithm
+#' Title
+#'
+#' @param range
+#'
+#' @return
+#' @export
+#'
+#' @examples
 pickRandom <- function(range) {
     colsCount <- length(range)
     random1 <- runif(1, 0, colsCount)
     index <- floor(random1)
-    return(range[index + 1])
+    range[index + 1]
 }
 
+#' Title
+#'
+#' @param conflicts
+#'
+#' @return
+#' @export
+#'
+#' @examples
+randomBalancing <- function(conflicts) {
+    pickRandom(conflicts)
+}
+
+# Round Robin algorithm
+#' Title
+#'
+#' @param range
+#' @param number
+#'
+#' @return
+#' @export
+#'
+#' @examples
 pickNext <- function(range, number) {
     index <- number %% length(range)
-    return(range[index + 1])
+    range[index + 1]
 }
 
-pickByOrder <- function(orderedRange, number) {
-    return(pickNext(orderedRange, number))
-}
-
-weightRoundRobin <- function(nodes, iteration) {
-    return(pickByOrder(nodes, iteration))
-}
-
+#' Title
+#'
+#' @param nodes
+#' @param iteration
+#'
+#' @return
+#' @export
+#'
+#' @examples
 roundRobin <- function(nodes, iteration) {
-    return(pickNext(nodes, iteration))
+    pickNext(nodes, iteration)
 }
 
-randomBalancing <- function(conflicts) {
-    return(pickRandom(conflicts))
+# Weight Round Robin algorithm
+#' Title
+#'
+#' @param orderedRange
+#' @param number
+#'
+#' @return
+#' @export
+#'
+#' @examples
+pickByOrder <- function(orderedRange, number) {
+    pickNext(orderedRange, number)
 }
 
+#' Title
+#'
+#' @param nodes
+#' @param iteration
+#'
+#' @return
+#' @export
+#'
+#' @examples
+weightRoundRobin <- function(nodes, iteration) {
+    pickByOrder(nodes, iteration)
+}
+
+
+# Utils
+#' Title
+#'
+#' @param nodes
+#'
+#' @return
+#' @export
+#'
+#' @examples
 getNodesIds <- function(nodes) {
     conflictedNodes <- matrix(c(0),
                               nrow = 1,
@@ -108,7 +206,8 @@ getNodesIds <- function(nodes) {
             conflictedNodes <- c(conflictedNodes, c(i))
         }
     }
-    return(conflictedNodes)
+
+    conflictedNodes
 }
 
 #' Title
@@ -145,9 +244,18 @@ getAllowedTransitions <- function(currentState, inputFunc) {
             }
         }
     }
-    return(allowedTransitions)
+
+    allowedTransitions
 }
 
+#' Title
+#'
+#' @param vector
+#'
+#' @return
+#' @export
+#'
+#' @examples
 createStartingVector <- function(vector) {
     vectorLength <- length(vector)
     startingVector <- matrix(0, nrow = 1, ncol = 1)
@@ -158,9 +266,18 @@ createStartingVector <- function(vector) {
             q <- 0
         }
     }
-    return(startingVector)
+
+    startingVector
 }
 
+#' Title
+#'
+#' @param vector
+#'
+#' @return
+#' @export
+#'
+#' @examples
 getTransactionNumber <- function(vector) {
     vectorLength <- length(vector)
     q <- 1
@@ -172,20 +289,54 @@ getTransactionNumber <- function(vector) {
             q <- 0
         }
     }
-    return(transitionNumber)
+
+    transitionNumber
 }
 
+#' Title
+#'
+#' @param lambda
+#' @param time
+#'
+#' @return
+#' @export
+#'
+#' @examples
 getEventTimeByLambda <- function(lambda, time) {
     randomTime <- (-1 / lambda) * log(1 - runif(1, 0, 1))
-    return(time + randomTime)
+
+    time + randomTime
 }
 
+#' Title
+#'
+#' @param lambda
+#' @param time1
+#' @param time2
+#'
+#' @return
+#' @export
+#'
+#' @examples
 analysEvents <- function(lambda, time1, time2) {
     randomTime <- (-1 / lambda) * log(1 - runif(1, 0, 1))
     maxTime <- max(time1, time2)
-    return(maxTime + randomTime)
+
+    maxTime + randomTime
 }
 
+#' Title
+#'
+#' @param timeOnOutput
+#' @param idleTime
+#' @param time1
+#' @param time2
+#' @param deltaTime
+#'
+#' @return
+#' @export
+#'
+#' @examples
 getSystemCharacteristics <- function(timeOnOutput, idleTime, time1, time2, deltaTime) {
     timeOnOutput <- timeOnOutput + deltaTime
     if (time1 >= time2) {
@@ -194,9 +345,20 @@ getSystemCharacteristics <- function(timeOnOutput, idleTime, time1, time2, delta
         time <- 0
     }
     idleTime <- idleTime + time
-    return(c(timeOnOutput, idleTime))
+
+    c(timeOnOutput, idleTime)
 }
 
+#' Title
+#'
+#' @param method
+#' @param nodes
+#' @param iteration
+#'
+#' @return
+#' @export
+#'
+#' @examples
 resolveConflict <- function(method, nodes, iteration) {
     if (method == "random") {
         return(randomBalancing(nodes))
@@ -209,6 +371,16 @@ resolveConflict <- function(method, nodes, iteration) {
     stop()
 }
 
+#' Title
+#'
+#' @param nodes
+#' @param iteration
+#' @param method
+#'
+#' @return
+#' @export
+#'
+#' @examples
 getTransitionNumberWithResolving <- function(nodes, iteration, method) {
     vectorLength <- length(nodes)
     q <- 1
@@ -227,19 +399,46 @@ getTransitionNumberWithResolving <- function(nodes, iteration, method) {
             q <- 0
         }
     }
-    return(transitionNumber)
+
+    transitionNumber
 }
 
+#' Title
+#'
+#' @param lambda
+#'
+#' @return
+#' @export
+#'
+#' @examples
 getRandomTimeForLambda <- function(lambda) {
-    randomTime <- (-1 / lambda) * log(1 - runif(1, 0, 1))
-    return(randomTime)
+    (-1 / lambda) * log(1 - runif(1, 0, 1))
 }
 
+#' Title
+#'
+#' @param currentTime
+#' @param lambda
+#'
+#' @return
+#' @export
+#'
+#' @examples
 getTransitionTime <- function(currentTime, lambda) {
-    time <- currentTime + getRandomTimeForLambda(lambda)
-    return(time)
+    currentTime + getRandomTimeForLambda(lambda)
 }
 
+#' Title
+#'
+#' @param transition
+#' @param processTime
+#' @param taskWeight
+#' @param detailedPerformanceLog
+#'
+#' @return
+#' @export
+#'
+#' @examples
 performTransition <-
     function(transition,
              processTime,
@@ -277,18 +476,37 @@ performTransition <-
         transitionTime <- getRandomTimeForLambda(lambda)
         #transitionTime <- lambda
         processTime <- processTime + transitionTime
-        return(list(processTime, detailedPerformanceLog))
+
+        list(processTime, detailedPerformanceLog)
     }
 
+#' Title
+#'
+#' @param headerVector
+#'
+#' @return
+#' @export
+#'
+#' @examples
 createStatsMatrix <- function(headerVector) {
     nodes <- getNodesIds(headerVector)
     statsMatrix <- matrix(0, 3, length(nodes))
     for (k in 1:length(nodes)) {
         statsMatrix[1, k] <- t(nodes)[k]
     }
-    return(statsMatrix)
+
+    statsMatrix
 }
 
+#' Title
+#'
+#' @param firstNode
+#' @param secondNode
+#'
+#' @return
+#' @export
+#'
+#' @examples
 makeAPlot <- function(firstNode, secondNode) {
     # Calculate range from 0 to max value of cars and trucks
     g_range <- range(0, firstNode, secondNode)
