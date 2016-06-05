@@ -369,7 +369,6 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
     performanceLog <- matrix(c(0, 0, 0), nrow = 3, ncol = 1, byrow = TRUE)
 
     # Detailed Performance Log for every processing unit
-    array(1:24, c(2,4,3))
     detailedPerformanceLog <- list(c(), c(), c())
     processLogForEveryTask <- c()
     processTime <- 0.0
@@ -377,7 +376,7 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
     for (i in 1:number) {
         transposedVector <- t(M)
         allowedTransitions <- getAllowedTransitions(transposedVector, inputFunc)
-        transitionNumber <- getTransitionNumberWithResolving(allowedTransitions, i, "random")
+        transitionNumber <- getTransitionNumberWithResolving(allowedTransitions, i, "roundRobin")
         #cat("[main] Transition number is: ", transitionNumber, "\n")
 
         # Creating matrix for results
@@ -396,6 +395,7 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
                 performanceLog[3, m] <- performanceLog[3, m] + currentTaskWeight
             }
         }
+
         newProccesTime <- 0.0
         list[newProccesTime, detailedPerformanceLog] <- performTransition(
             transitionNumber, timeForCycle, currentTaskWeight, detailedPerformanceLog
@@ -403,7 +403,7 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
 
         timeForCycle <- newProccesTime
         startingVector <- createStartingVector(allowedTransitions)
-        if (transitionNumber == 9) {
+        if (transitionNumber == nrow(commonFunc)) {
             #cat("[main] Time for this loop is: ", timeForCycle, "\n")
             processLogForEveryTask <- c(processLogForEveryTask, c(timeForCycle))
             processTime <- processTime + timeForCycle
@@ -418,6 +418,7 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
     }
 
     cat("[Results] Result time: ", processTime, "\n")
+
     rownames(performanceLog) <- c("Transition", "Tasks count", "Loading")
     print(performanceLog)
 
