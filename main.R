@@ -16,7 +16,7 @@ APlus = matrix(
         0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 1
-    ), nrow=9, ncol=10, byrow=TRUE)
+    ), nrow = 9, ncol = 10, byrow = TRUE)
 
 # A- function
 AMinus = matrix(
@@ -30,7 +30,7 @@ AMinus = matrix(
         0, 0, 0, 0, 0, 0, 1, 0, 1, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
         1, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    ), nrow=9, ncol=10, byrow=TRUE)
+    ), nrow = 9, ncol = 10, byrow = TRUE)
 
 # Transitions that conflicted with each other
 conflictedTransitions = matrix(
@@ -266,8 +266,8 @@ performTransition <- function(transition, processTime, taskWeight, detailedPerfo
     } else if (transition == 9) {
         lambda <- 0.9
     }
-    # transitionTime <- getRandomTimeForLambda(lambda)
-    transitionTime <- lambda
+    transitionTime <- getRandomTimeForLambda(lambda)
+    #transitionTime <- lambda
     processTime <- processTime + transitionTime
     return(list(processTime, detailedPerformanceLog))
 }
@@ -303,7 +303,9 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
     # Detailed Performance Log for every processing unit
     array(1:24, c(2,4,3))
     detailedPerformanceLog <- list(c(), c(), c())
+    processLogForEveryTask <- c()
     processTime <- 0.0
+    timeForCycle <- 0.0
     for (i in 1:number) {
         transposedVector <- t(M)
         allowedTransitions <- getAllowedTransitions(transposedVector, inputFunc)
@@ -326,13 +328,20 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
                 performanceLog[3, m] <- performanceLog[3, m] + currentTaskWeight
             }
         }
-
+        newProccesTime <- 0.0
         list[newProccesTime, detailedPerformanceLog] <- performTransition(
-            transitionNumber, processTime, currentTaskWeight, detailedPerformanceLog
+            transitionNumber, timeForCycle, currentTaskWeight, detailedPerformanceLog
         )
 
-        processTime <- newProccesTime
+        timeForCycle <- newProccesTime
         startingVector <- createStartingVector(allowedTransitions)
+        if (transitionNumber == 9) {
+            cat("[main] Time for this loop is: ", timeForCycle, "\n")
+            processLogForEveryTask <- c(processLogForEveryTask, c(timeForCycle))
+            processTime <- processTime + timeForCycle
+            timeForCycle <- 0.0
+        }
+
         M <- t(startingVector) %*% commonFunc + M
         if (taskNumber > 0 && tasksCount == taskNumber) {
             cat("[main] Tasks are closed\n")
@@ -352,39 +361,70 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
     cat("Node 1 tasks median time: ", median(firstNode), "\n")
     cat("Node 2 tasks average time: ", mean(secondNode), "\n")
     cat("Node 3 tasks average time: ", mean(thirdNode), "\n")
+
     # Calculate range from 0 to max value of cars and trucks
     g_range <- range(0, firstNode, secondNode)
     # Graph autos using y axis that ranges from 0 to max
     # value in cars or trucks vector.  Turn off axes and
     # annotations (axis labels) so we can specify them ourself
-    plot(firstNode, type="o", col="blue", ylim=g_range,  axes=FALSE, ann=FALSE)
+    plot(
+        firstNode,
+        type = "o",
+        col = "blue",
+        ylim = g_range,
+        axes = FALSE,
+        ann = FALSE
+    )
 
     # Make x axis using Mon-Fri labels
-    axis(1, at=1:5, lab=c("Mon","Tue","Wed","Thu","Fri"))
+    axis(1,
+         at = 1:5,
+         lab = c("Mon", "Tue", "Wed", "Thu", "Fri"))
 
     # Make y axis with horizontal labels that display ticks at
     # every 4 marks. 4*0:g_range[2] is equivalent to c(0,4,8,12).
-    axis(2, las=1, at=4*0:g_range[2])
+    axis(2, las = 1, at = 4 * 0:g_range[2])
 
     # Create box around plot
     box()
 
     # Graph trucks with red dashed line and square points
-    lines(secondNode, type="o", pch=22, lty=2, col="red")
+    lines(
+        secondNode,
+        type = "o",
+        pch = 22,
+        lty = 2,
+        col = "red"
+    )
 
     # Create a title with a red, bold/italic font
-    title(main="Test 1", col.main="red", font.main=4)
+    title(main = "Test 1",
+          col.main = "red",
+          font.main = 4)
 
     # Label the x and y axes with dark green text
-    title(xlab="Days", col.lab=rgb(0,0.5,0))
-    title(ylab="Total", col.lab=rgb(0,0.5,0))
+    title(xlab = "Days", col.lab = rgb(0, 0.5, 0))
+    title(ylab = "Total", col.lab = rgb(0, 0.5, 0))
 
     # Create a legend at (1, g_range[2]) that is slightly smaller
     # (cex) and uses the same line colors and points used by
     # the actual plots
-    legend(1, g_range[2], c("firstNode","secondNode"), cex=0.8, col=c("blue","red"), pch=21:22, lty=1:2);
+    legend(
+        1,
+        g_range[2],
+        c("firstNode", "secondNode"),
+        cex = 0.8,
+        col = c("blue", "red"),
+        pch = 21:22,
+        lty = 1:2
+    )
+
+    cat("Average time of processing task in whole system:",
+        mean(processLogForEveryTask),
+        "\n")
 }
 
+inputDistribution <- "hola!" # implement mech of input distribution
 numberOfTransitionsToPerform <- 1000
 taskNumber <- 30
 
