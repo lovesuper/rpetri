@@ -1,4 +1,7 @@
 #https://raw.githubusercontent.com/ggrothendieck/gsubfn/master/R/list.R
+library(crayon)
+
+error <- red$bold
 
 list <- structure(NA, class = "result")
 #' Title
@@ -84,7 +87,7 @@ testRequestsWeights = matrix(
 #' @export
 #'
 #' @examples
-pickLastSuccessfulNode <- function() {
+pickNodeWithLeastConnections <- function() {
 
 }
 
@@ -361,14 +364,19 @@ getSystemCharacteristics <- function(timeOnOutput, idleTime, time1, time2, delta
 #' @examples
 resolveConflict <- function(method, nodes, iteration) {
     if (method == "random") {
-        return(randomBalancing(nodes))
+        randomBalancing(nodes)
     } else if (method == "roundRobin") {
-        return(roundRobin(nodes, iteration))
+        roundRobin(nodes, iteration)
     } else if (method == "weightRoundRobin") {
-        return(weightRoundRobin(nodes, iteration))
+        weightRoundRobin(nodes, iteration)
+    } else if (method == "leastConnectoins") {
+        pickNodeWithLeastConnections()
+    } else if (method == "dynamicWeightRoundRobin") {
+        pickNodeWithLeastConnections()
+    } else {
+        cat("There is " %+% error("no") %+% " such balancing method: ", method)
+        stop("Error")
     }
-
-    stop()
 }
 
 #' Title
@@ -567,6 +575,27 @@ makeAPlot <- function(firstNode, secondNode) {
 
 }
 
+dataAnalysis <- function(detailedPerformanceLog, processLogForEveryTask) {
+    firstNode <- detailedPerformanceLog[[1]]
+    secondNode <- detailedPerformanceLog[[2]]
+    thirdNode <- detailedPerformanceLog[[3]]
+
+    cat("[Results] Node 1 tasks average time: ", mean(firstNode), "\n")
+    cat("[Results] Node 1 tasks median time: ", median(firstNode), "\n")
+
+    cat("[Results] Node 2 tasks average time: ", mean(secondNode), "\n")
+    cat("[Results] Node 2 tasks median time: ", median(secondNode), "\n")
+
+    cat("[Results] Node 3 tasks average time: ", mean(thirdNode), "\n")
+    cat("[Results] Node 3 tasks median time: ", median(thirdNode), "\n")
+
+    cat(
+        "[Results] Average time of processing task in whole system:",
+        mean(processLogForEveryTask),
+        "\n"
+    )
+}
+
 #' Main function for experiment
 #'
 #' @param inputFunc is param for A+
@@ -594,7 +623,7 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
     for (i in 1:number) {
         transposedVector <- t(M)
         allowedTransitions <- getAllowedTransitions(transposedVector, inputFunc)
-        transitionNumber <- getTransitionNumberWithResolving(allowedTransitions, i, "roundRobin")
+        transitionNumber <- getTransitionNumberWithResolving(allowedTransitions, i, "random")
         #cat("[main] Transition number is: ", transitionNumber, "\n")
 
         # Creating matrix for results
@@ -640,21 +669,11 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
     rownames(performanceLog) <- c("Transition", "Tasks count", "Loading")
     print(performanceLog)
 
-    firstNode <- detailedPerformanceLog[[1]]
-    secondNode <- detailedPerformanceLog[[2]]
-    thirdNode <- detailedPerformanceLog[[3]]
-
-    cat("[Results] Node 1 tasks average time: ", mean(firstNode), "\n")
-    cat("[Results] Node 1 tasks median time: ", median(firstNode), "\n")
-    cat("[Results] Node 2 tasks average time: ", mean(secondNode), "\n")
-    cat("[Results] Node 3 tasks average time: ", mean(thirdNode), "\n")
-    cat(
-        "[Results] Average time of processing task in whole system:",
-        mean(processLogForEveryTask),
-        "\n"
+    dataAnalysis <- dataAnalysis(
+        detailedPerformanceLog, processLogForEveryTask
     )
 
-    makeAPlot(firstNode, secondNode)
+    # makeAPlot(firstNode, secondNode)
 }
 
 inputDistribution <- "hola!" # implement mech of input distribution
