@@ -436,7 +436,7 @@ getTransitionTime <- function(currentTime, lambda) {
     currentTime + getRandomTimeForLambda(lambda)
 }
 
-#' Title
+#' Perform Transition
 #'
 #' @param transition
 #' @param processTime
@@ -451,23 +451,49 @@ performTransition <-
     function(transition,
              processTime,
              taskWeight,
-             detailedPerformanceLog) {
+             detailedPerformanceLog,
+             nodesState) {
         lambda <- 0.1
         transitionTime <- 0.0
         if (transition == 1) {
             # Starting transition
+            # Need to make a custom generator here in another words --
+            # custom distribution
             lambda <- 0.1
         } else if (transition == 2) {
             # First node
             lambda <- 0.7 * taskWeight
+            nodesState[[transition]] <- nodesState[[transition]] + lambda
+            if (nodesState[[transition]] >= 20) {
+                # skip this task
+                nodesState[[transition]] <- 0
+            } else {
+            }
+
             detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
         } else if (transition == 3) {
             # Second node
             lambda <- 0.5 * taskWeight
+
+            nodesState[[transition]] <- nodesState[[transition]] + lambda
+            if (nodesState[[transition]] >= 10) {
+                # skip this task
+                nodesState[[transition]] <- 0
+            } else {
+            }
+
             detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
         } else if (transition == 4) {
             # Third node
             lambda <- 0.2 * taskWeight
+
+            nodesState[[transition]] <- nodesState[[transition]] + lambda
+            if (nodesState[[transition]] >= 15) {
+                # skip this task
+                nodesState[[transition]] <- 0
+            } else {
+            }
+
             detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
         } else if (transition == 5) {
             #
@@ -481,11 +507,12 @@ performTransition <-
         } else if (transition == 9) {
             lambda <- 0.9
         }
+
         transitionTime <- getRandomTimeForLambda(lambda)
         #transitionTime <- lambda
         processTime <- processTime + transitionTime
 
-        list(processTime, detailedPerformanceLog)
+        list(processTime, detailedPerformanceLog, nodesState)
     }
 
 #' Title
@@ -620,6 +647,7 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
     processLogForEveryTask <- c()
     processTime <- 0.0
     timeForCycle <- 0.0
+    nodesState <- list(0, 0, 0, 0, 0, 0, 0, 0, 0)
     for (i in 1:number) {
         transposedVector <- t(M)
         allowedTransitions <- getAllowedTransitions(transposedVector, inputFunc)
@@ -644,10 +672,12 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
         }
 
         newProccesTime <- 0.0
-        list[newProccesTime, detailedPerformanceLog] <- performTransition(
-            transitionNumber, timeForCycle, currentTaskWeight, detailedPerformanceLog
+        newNodesState <- NA
+        list[newProccesTime, detailedPerformanceLog, newNodesState] <- performTransition(
+            transitionNumber, timeForCycle, currentTaskWeight, detailedPerformanceLog, nodesState
         )
 
+        nodesState <- newNodesState
         timeForCycle <- newProccesTime
         startingVector <- createStartingVector(allowedTransitions)
         if (transitionNumber == nrow(commonFunc)) {
@@ -678,7 +708,7 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
 
 inputDistribution <- "hola!" # implement mech of input distribution
 numberOfTransitionsToPerform <- 1000
-taskNumber <- 30
+taskNumber <- 300
 
 main(APlus,
      AMinus,
