@@ -452,7 +452,8 @@ performTransition <-
              processTime,
              taskWeight,
              detailedPerformanceLog,
-             nodesState) {
+             nodesState,
+             rejectedTasks) {
         lambda <- 0.1
         transitionTime <- 0.0
         if (transition == 1) {
@@ -464,8 +465,9 @@ performTransition <-
             # First node
             lambda <- 0.7 * taskWeight
             nodesState[[transition]] <- nodesState[[transition]] + lambda
-            if (nodesState[[transition]] >= 20) {
+            if (nodesState[[transition]] >= 30) {
                 # skip this task
+                rejectedTasks[[transition]] = rejectedTasks[[transition]] + 1
                 nodesState[[transition]] <- 0
             } else {
             }
@@ -476,8 +478,9 @@ performTransition <-
             lambda <- 0.5 * taskWeight
 
             nodesState[[transition]] <- nodesState[[transition]] + lambda
-            if (nodesState[[transition]] >= 10) {
+            if (nodesState[[transition]] >= 20) {
                 # skip this task
+                rejectedTasks[[transition]] = rejectedTasks[[transition]] + 1
                 nodesState[[transition]] <- 0
             } else {
             }
@@ -488,8 +491,9 @@ performTransition <-
             lambda <- 0.2 * taskWeight
 
             nodesState[[transition]] <- nodesState[[transition]] + lambda
-            if (nodesState[[transition]] >= 15) {
+            if (nodesState[[transition]] >= 25) {
                 # skip this task
+                rejectedTasks[[transition]] = rejectedTasks[[transition]] + 1
                 nodesState[[transition]] <- 0
             } else {
             }
@@ -512,7 +516,7 @@ performTransition <-
         #transitionTime <- lambda
         processTime <- processTime + transitionTime
 
-        list(processTime, detailedPerformanceLog, nodesState)
+        list(processTime, detailedPerformanceLog, nodesState, rejectedTasks)
     }
 
 #' Title
@@ -648,6 +652,7 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
     processTime <- 0.0
     timeForCycle <- 0.0
     nodesState <- list(0, 0, 0, 0, 0, 0, 0, 0, 0)
+    rejectedTasks <- list(0, 0, 0, 0, 0, 0, 0, 0, 0)
     for (i in 1:number) {
         transposedVector <- t(M)
         allowedTransitions <- getAllowedTransitions(transposedVector, inputFunc)
@@ -673,12 +678,20 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
 
         newProccesTime <- 0.0
         newNodesState <- NA
-        list[newProccesTime, detailedPerformanceLog, newNodesState] <- performTransition(
-            transitionNumber, timeForCycle, currentTaskWeight, detailedPerformanceLog, nodesState
+        newRejectedTasks <- NA
+        list[newProccesTime, detailedPerformanceLog, newNodesState, newRejectedTasks] <- performTransition(
+            transitionNumber,
+            timeForCycle,
+            currentTaskWeight,
+            detailedPerformanceLog,
+            nodesState,
+            rejectedTasks
         )
 
         nodesState <- newNodesState
+        rejectedTasks <- newRejectedTasks
         timeForCycle <- newProccesTime
+
         startingVector <- createStartingVector(allowedTransitions)
         if (transitionNumber == nrow(commonFunc)) {
             #cat("[main] Time for this loop is: ", timeForCycle, "\n")
@@ -698,7 +711,11 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
 
     rownames(performanceLog) <- c("Transition", "Tasks count", "Loading")
     print(performanceLog)
+    cat("Rejected tasks:\n")
 
+    cat("[Results] Node 1 rejected", rejectedTasks[[2]], "tasks\n")
+    cat("[Results] Node 2 rejected", rejectedTasks[[3]], "tasks\n")
+    cat("[Results] Node 3 rejected", rejectedTasks[[4]], "tasks\n")
     dataAnalysis <- dataAnalysis(
         detailedPerformanceLog, processLogForEveryTask
     )
