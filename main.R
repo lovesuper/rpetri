@@ -420,7 +420,8 @@ getTransitionNumberWithResolving <- function(nodes, iteration, method) {
 #'
 #' @examples
 getRandomTimeForLambda <- function(lambda) {
-    (-1 / lambda) * log(1 - runif(1, 0, 1))
+    # (-1 / lambda) * log(1 - runif(1, 0, 1))
+    runif(1, 0, 1) + lambda
 }
 
 #' Title
@@ -456,6 +457,7 @@ performTransition <-
              rejectedTasks) {
         lambda <- 0.1
         transitionTime <- 0.0
+        currentPerformer <- NA
         if (transition == 1) {
             # Starting transition
             # Need to make a custom generator here in another words --
@@ -471,7 +473,7 @@ performTransition <-
                 nodesState[[transition]] <- 0
             } else {
             }
-
+            currentPerformer <- transition
             detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
         } else if (transition == 3) {
             # Second node
@@ -485,6 +487,7 @@ performTransition <-
             } else {
             }
 
+            currentPerformer <- transition
             detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
         } else if (transition == 4) {
             # Third node
@@ -498,6 +501,7 @@ performTransition <-
             } else {
             }
 
+            currentPerformer <- transition
             detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
         } else if (transition == 5) {
             #
@@ -512,11 +516,11 @@ performTransition <-
             lambda <- 0.9
         }
 
-        transitionTime <- getRandomTimeForLambda(lambda)
-        #transitionTime <- lambda
+        # transitionTime <- getRandomTimeForLambda(lambda)
+        transitionTime <- lambda
         processTime <- processTime + transitionTime
 
-        list(processTime, detailedPerformanceLog, nodesState, rejectedTasks)
+        list(processTime, detailedPerformanceLog, nodesState, rejectedTasks, currentPerformer)
     }
 
 #' Title
@@ -606,27 +610,6 @@ makeAPlot <- function(firstNode, secondNode) {
 
 }
 
-dataAnalysis <- function(detailedPerformanceLog, processLogForEveryTask) {
-    firstNode <- detailedPerformanceLog[[1]]
-    secondNode <- detailedPerformanceLog[[2]]
-    thirdNode <- detailedPerformanceLog[[3]]
-
-    cat("[Results] Node 1 tasks average time: ", mean(firstNode), "\n")
-    cat("[Results] Node 1 tasks median time: ", median(firstNode), "\n")
-
-    cat("[Results] Node 2 tasks average time: ", mean(secondNode), "\n")
-    cat("[Results] Node 2 tasks median time: ", median(secondNode), "\n")
-
-    cat("[Results] Node 3 tasks average time: ", mean(thirdNode), "\n")
-    cat("[Results] Node 3 tasks median time: ", median(thirdNode), "\n")
-
-    cat(
-        "[Results] Average time of processing task in whole system:",
-        mean(processLogForEveryTask),
-        "\n"
-    )
-}
-
 #' Main function for experiment
 #'
 #' @param inputFunc is param for A+
@@ -653,10 +636,12 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
     timeForCycle <- 0.0
     nodesState <- list(0, 0, 0, 0, 0, 0, 0, 0, 0)
     rejectedTasks <- list(0, 0, 0, 0, 0, 0, 0, 0, 0)
+    idleTimeForWorkingNodes <- list(c(), c(), c(), c(), c(), c(), c())
+    currentPerformer <- NA
     for (i in 1:number) {
         transposedVector <- t(M)
         allowedTransitions <- getAllowedTransitions(transposedVector, inputFunc)
-        transitionNumber <- getTransitionNumberWithResolving(allowedTransitions, i, "random")
+        transitionNumber <- getTransitionNumberWithResolving(allowedTransitions, i, "roundRobin")
         #cat("[main] Transition number is: ", transitionNumber, "\n")
 
         # Creating matrix for results
@@ -679,7 +664,8 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
         newProccesTime <- 0.0
         newNodesState <- NA
         newRejectedTasks <- NA
-        list[newProccesTime, detailedPerformanceLog, newNodesState, newRejectedTasks] <- performTransition(
+        newCurrentPerformer <- NA
+        list[newProccesTime, detailedPerformanceLog, newNodesState, newRejectedTasks, newCurrentPerformer] <- performTransition(
             transitionNumber,
             timeForCycle,
             currentTaskWeight,
@@ -687,6 +673,9 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
             nodesState,
             rejectedTasks
         )
+        if (!is.na(newCurrentPerformer)) {
+            currentPerformer <- newCurrentPerformer
+        }
 
         nodesState <- newNodesState
         rejectedTasks <- newRejectedTasks
@@ -694,7 +683,20 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
 
         startingVector <- createStartingVector(allowedTransitions)
         if (transitionNumber == nrow(commonFunc)) {
-            #cat("[main] Time for this loop is: ", timeForCycle, "\n")
+            # cat("[main] Idle time for loop:",
+            #     timeForCycle,
+            #     "minus",
+            #     tail(detailedPerformanceLog[[currentPerformer - 1]], 1),
+            #     "working node\t№", currentPerformer,
+            #     "\n"
+            # )
+            idleTimeForLoop <- timeForCycle - tail(detailedPerformanceLog[[currentPerformer - 1]], 1)
+            idleTimeForWorkingNodes[[currentPerformer - 1]] <- c(
+                idleTimeForWorkingNodes[[currentPerformer - 1]], idleTimeForLoop
+            )
+            # cat("[main] Idle time for loop:", idleTimeForLoop,
+            #     "working node\t№", currentPerformer, "\n"
+            # )
             processLogForEveryTask <- c(processLogForEveryTask, c(timeForCycle))
             processTime <- processTime + timeForCycle
             timeForCycle <- 0.0
@@ -706,6 +708,9 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
             break()
         }
     }
+    cat("Sum idle time for first working node", sum(idleTimeForWorkingNodes[[1]]), "\n")
+    cat("Sum idle time for second working node", sum(idleTimeForWorkingNodes[[2]]), "\n")
+    cat("Sum idle time for third working node", sum(idleTimeForWorkingNodes[[3]]), "\n")
 
     cat("[Results] Result time: ", processTime, "\n")
 
@@ -716,16 +721,43 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
     cat("[Results] Node 1 rejected", rejectedTasks[[2]], "tasks\n")
     cat("[Results] Node 2 rejected", rejectedTasks[[3]], "tasks\n")
     cat("[Results] Node 3 rejected", rejectedTasks[[4]], "tasks\n")
-    dataAnalysis <- dataAnalysis(
-        detailedPerformanceLog, processLogForEveryTask
+    firstNode <- detailedPerformanceLog[[1]]
+    secondNode <- detailedPerformanceLog[[2]]
+    thirdNode <- detailedPerformanceLog[[3]]
+
+    cat("[Results] Node 1 tasks average time: ", mean(firstNode), "\n")
+    cat("[Results] Node 1 tasks median time: ", median(firstNode), "\n")
+
+    cat("[Results] Node 2 tasks average time: ", mean(secondNode), "\n")
+    cat("[Results] Node 2 tasks median time: ", median(secondNode), "\n")
+
+    cat("[Results] Node 3 tasks average time: ", mean(thirdNode), "\n")
+    cat("[Results] Node 3 tasks median time: ", median(thirdNode), "\n")
+
+    cat(
+        "[Results] Average time of processing task in whole system:",
+        mean(processLogForEveryTask),
+        "\n"
     )
+
+    firstNodeEfficiency <-
+        1 - 1 / (performanceLog[3, 1] / sum(idleTimeForWorkingNodes[[1]]))
+    cat("Efficiency of first node is", firstNodeEfficiency, "\n")
+
+    secondNodeEfficiency <-
+        1 - 1 / (performanceLog[3, 2] / sum(idleTimeForWorkingNodes[[2]]))
+    cat("Efficiency of second node is", secondNodeEfficiency, "\n")
+
+    thirdNodeEfficiency <-
+        1 - 1 / (performanceLog[3, 3] / sum(idleTimeForWorkingNodes[[3]]))
+    cat("Efficiency of third node is", thirdNodeEfficiency, "\n")
 
     # makeAPlot(firstNode, secondNode)
 }
 
 inputDistribution <- "hola!" # implement mech of input distribution
 numberOfTransitionsToPerform <- 1000
-taskNumber <- 300
+taskNumber <- 10
 
 main(APlus,
      AMinus,
