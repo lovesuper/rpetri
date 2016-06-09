@@ -156,6 +156,7 @@ pickNext <- function(range, number) {
 #' @examples
 roundRobin <- function(nodes, iteration) {
     pickNext(nodes, iteration)
+    # 3
 }
 
 # Weight Round Robin algorithm
@@ -505,15 +506,15 @@ performTransition <-
             detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
         } else if (transition == 5) {
             #
-            lambda <- 0.5
+            lambda <- 0.1
         } else if (transition == 6) {
-            lambda <- 0.6
+            lambda <- 0.1
         } else if (transition == 7) {
-            lambda <- 0.7
+            lambda <- 0.1
         } else if (transition == 8) {
-            lambda <- 0.8
+            lambda <- 0.1
         } else if (transition == 9) {
-            lambda <- 0.9
+            lambda <- 0.1
         }
 
         # transitionTime <- getRandomTimeForLambda(lambda)
@@ -609,22 +610,37 @@ makeAPlot <- function(firstNode, secondNode) {
     )
 
 }
+header <- function(text) {
+    cat("\n[", toupper(text), "]\n")
+}
+
+subheader <- function(text) {
+    cat("\n[", text, "]\n")
+}
+
+calculate_efficiency <- function(workingTime, idleTime) {
+    signif(1 - 1 / (workingTime / idleTime), 3)
+}
+
+calculate_loading <- function(workingTime, idleTime) {
+    signif(workingTime / idleTime, 3)
+}
 
 #' Main function for experiment
 #'
 #' @param inputFunc is param for A+
 #' @param outputFunc is param for A-
 #' @param M is starting marking
-#' @param number is count of transitions to perform
-#' @param taskNumber is count of tasks to be done
+#' @param transitionsCount is count of transitions to perform
+#' @param tasksCount is count of tasks to be done
 #'
 #' @return
 #' @export
 #'
 #' @examples
-main <- function(inputFunc, outputFunc, M, number, taskNumber) {
+main <- function(inputFunc, outputFunc, M, transitionsCount, tasksCount) {
     commonFunc <- outputFunc - inputFunc
-    tasksCount <- 0
+    performedTasksCount <- 0
 
     # Summary performance log for every processing unit
     performanceLog <- matrix(c(0, 0, 0), nrow = 3, ncol = 1, byrow = TRUE)
@@ -638,7 +654,7 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
     rejectedTasks <- list(0, 0, 0, 0, 0, 0, 0, 0, 0)
     idleTimeForWorkingNodes <- list(c(), c(), c(), c(), c(), c(), c())
     currentPerformer <- NA
-    for (i in 1:number) {
+    for (i in 1:transitionsCount) {
         transposedVector <- t(M)
         allowedTransitions <- getAllowedTransitions(transposedVector, inputFunc)
         transitionNumber <- getTransitionNumberWithResolving(allowedTransitions, i, "roundRobin")
@@ -651,8 +667,8 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
 
         for (m in 1:ncol(performanceLog)) {
             if (performanceLog[1, m] == transitionNumber) {
-                currentTaskWeight <- testRequestsWeights[tasksCount %% length(testRequestsWeights) + 1]
-                tasksCount <- tasksCount + 1
+                currentTaskWeight <- testRequestsWeights[performedTasksCount %% length(testRequestsWeights) + 1]
+                performedTasksCount <- performedTasksCount + 1
                 #cat("[main] Task number: ", tasksCount, "\n")
                 # Counting tasks amount
                 performanceLog[2, m] <- performanceLog[2, m] + 1
@@ -703,67 +719,129 @@ main <- function(inputFunc, outputFunc, M, number, taskNumber) {
         }
 
         M <- t(startingVector) %*% commonFunc + M
-        if (taskNumber > 0 && tasksCount == taskNumber) {
+        if (tasksCount > 0 && performedTasksCount == tasksCount) {
             #cat("[main] Tasks are closed\n")
             break()
         }
     }
-    cat("Sum idle time for first working node", sum(idleTimeForWorkingNodes[[1]]), "\n")
-    cat("Sum idle time for second working node", sum(idleTimeForWorkingNodes[[2]]), "\n")
-    cat("Sum idle time for third working node", sum(idleTimeForWorkingNodes[[3]]), "\n")
 
-    cat("[Results] Result time: ", processTime, "\n")
+    workingNodesCount <- 3
 
-    rownames(performanceLog) <- c("Transition", "Tasks count", "Loading")
-    print(performanceLog)
-    cat("Rejected tasks:\n")
+    # Results
+    # cat("\014") # Clear consosle output
+    header("System configuration")
 
-    cat("[Results] Node 1 rejected", rejectedTasks[[2]], "tasks\n")
-    cat("[Results] Node 2 rejected", rejectedTasks[[3]], "tasks\n")
-    cat("[Results] Node 3 rejected", rejectedTasks[[4]], "tasks\n")
+    cat("Working nodes count:\t", workingNodesCount, "\n")
+    cat("Input distribution:\t", "`Unknown value`", "\n")
+    cat("Transitions count:\t", transitionsCount, "\n")
+    cat("Tasks count to perform:\t", tasksCount, "\n")
+
+    header("System characteristics")
+
+    subheader("Idle time")
+
+    cat("Idle time for 1st working node", sum(idleTimeForWorkingNodes[[1]]), "\n")
+    cat("Idle time for 2nd working node", sum(idleTimeForWorkingNodes[[2]]), "\n")
+    cat("Idle time for 3rd working node", sum(idleTimeForWorkingNodes[[3]]), "\n")
+
+    subheader("Main characteristics")
+
+    cat("Tasks performed in 1st working node", performanceLog[2, 1], "(transition number:", performanceLog[1, 1], ")\n")
+    cat("Tasks performed in 2nd working node", performanceLog[2, 2], "(transition number:", performanceLog[1, 2], ")\n")
+    cat("Tasks performed in 3rd working node", performanceLog[2, 3], "(transition number:", performanceLog[1, 3], ")\n")
+
+    # rownames(performanceLog) <- c("Transition", "Tasks count", "Loading")
+    # print(performanceLog)
+
+    subheader("Rejected tasks per node")
+
+    cat("Node 1 rejected", rejectedTasks[[2]], "tasks\n")
+    cat("Node 2 rejected", rejectedTasks[[3]], "tasks\n")
+    cat("Node 3 rejected", rejectedTasks[[4]], "tasks\n")
+
+    subheader("Tasks performing per node")
+
     firstNode <- detailedPerformanceLog[[1]]
     secondNode <- detailedPerformanceLog[[2]]
     thirdNode <- detailedPerformanceLog[[3]]
+    if (!is.null(firstNode)) {
+        cat("Node 1 task performing mean time: ", signif(mean(firstNode), 3), "\n")
+        cat("Node 1 tasks performing median time: ", signif(median(firstNode), 3), "\n")
+    } else {
+        firstNode <- NULL
+    }
 
-    cat("[Results] Node 1 tasks average time: ", mean(firstNode), "\n")
-    cat("[Results] Node 1 tasks median time: ", median(firstNode), "\n")
+    if (!is.null(secondNode)) {
+        cat("Node 2 tasks performing mean time: ", signif(mean(secondNode), 3), "\n")
+        cat("Node 2 tasks performing median time: ", signif(median(secondNode), 3), "\n")
+    } else {
+        secondNode <- NULL
+    }
 
-    cat("[Results] Node 2 tasks average time: ", mean(secondNode), "\n")
-    cat("[Results] Node 2 tasks median time: ", median(secondNode), "\n")
+    if (!is.null(thirdNode)) {
+        cat("Node 3 tasks performing mean time: ", signif(mean(thirdNode), 3), "\n")
+        cat("Node 3 tasks performing median time: ", signif(median(thirdNode), 3), "\n")
+    } else {
+        thirdNode <- NULL
+    }
+    subheader("Loading per nodes")
 
-    cat("[Results] Node 3 tasks average time: ", mean(thirdNode), "\n")
-    cat("[Results] Node 3 tasks median time: ", median(thirdNode), "\n")
+    firstNodeLoading <- calculate_loading(performanceLog[3, 1], sum(idleTimeForWorkingNodes[[1]]))
+    cat("Loading of first working node is", firstNodeLoading, "\n")
 
-    cat(
-        "[Results] Average time of processing task in whole system:",
-        mean(processLogForEveryTask),
-        "\n"
-    )
+    secondNodeLoading <- calculate_loading(performanceLog[3, 2], sum(idleTimeForWorkingNodes[[2]]))
+    cat("Loading of second working node is", secondNodeLoading, "\n")
 
-    firstNodeEfficiency <-
-        1 - 1 / (performanceLog[3, 1] / sum(idleTimeForWorkingNodes[[1]]))
-    cat("Efficiency of first node is", firstNodeEfficiency, "\n")
+    thirdNodeLoading <- calculate_loading(performanceLog[3, 3], sum(idleTimeForWorkingNodes[[3]]))
+    cat("Loading of third working node is", thirdNodeLoading, "\n")
 
-    secondNodeEfficiency <-
-        1 - 1 / (performanceLog[3, 2] / sum(idleTimeForWorkingNodes[[2]]))
-    cat("Efficiency of second node is", secondNodeEfficiency, "\n")
+    subheader("Efficiency per nodes")
 
-    thirdNodeEfficiency <-
-        1 - 1 / (performanceLog[3, 3] / sum(idleTimeForWorkingNodes[[3]]))
-    cat("Efficiency of third node is", thirdNodeEfficiency, "\n")
+    if (!is.null(firstNode)) {
+        firstNodeEfficiency <- calculate_efficiency(performanceLog[3, 1], sum(idleTimeForWorkingNodes[[1]]))
+        cat("Efficiency of first working node is", firstNodeEfficiency, "\n")
+    } else {
+        firstNodeEfficiency <- 0
+    }
+
+    if (!is.null(secondNode)) {
+        secondNodeEfficiency <- calculate_efficiency(performanceLog[3, 2], sum(idleTimeForWorkingNodes[[2]]))
+        cat("Efficiency of second working node is", secondNodeEfficiency, "\n")
+    } else {
+        secondNodeEfficiency <- 0
+    }
+
+    if (!is.null(thirdNode)) {
+        thirdNodeEfficiency <- calculate_efficiency(performanceLog[3, 3], sum(idleTimeForWorkingNodes[[3]]))
+        cat("Efficiency of third working node is", thirdNodeEfficiency, "\n")
+    } else {
+        thirdNodeEfficiency <- 0
+    }
+
+    subheader("Whole system result")
+
+    cat("Result system whole time: ", processTime, "\n")
+
+    wholeSystemEfficiency =  mean(c(firstNodeEfficiency, secondNodeEfficiency, thirdNodeEfficiency))
+    cat("Efficiency of whole system: ", signif(wholeSystemEfficiency, 3), "\n")
+    cat("Mean loading of whole system: ", signif(median(
+        c(median(firstNodeLoading), median(secondNodeLoading), median(thirdNodeLoading))
+    ), 3), "\n")
+    cat("Mean time of processing task in whole system:", mean(processLogForEveryTask), "\n")
+    cat("Rejected tasks in whole system:", rejectedTasks[[1]] + rejectedTasks[[2]] + rejectedTasks[[3]], "\n")
 
     # makeAPlot(firstNode, secondNode)
 }
 
 inputDistribution <- "hola!" # implement mech of input distribution
-numberOfTransitionsToPerform <- 1000
-taskNumber <- 10
+transitionsCount <- 100000
+tasksCount <- 50
 
 main(APlus,
      AMinus,
      startingMarks,
-     numberOfTransitionsToPerform,
-     taskNumber)
+     transitionsCount,
+     tasksCount)
 
 
 
