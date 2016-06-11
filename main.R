@@ -78,6 +78,12 @@ testRequestsWeights = matrix(
     byrow = TRUE
 )
 
+testRequestsWeights = matrix(
+    c(10, 3, 20, 5, 9, 30, 6, 4, 90, 7, 4, 80, 4, 90, 6, 3, 40, 2, 10, 10),
+    nrow = 1,
+    ncol = 20,
+    byrow = TRUE
+)
 
 # Random algorithm
 #' Title
@@ -212,7 +218,6 @@ dynamicWeightAlgorithm <- function(systemHistory, scheduleList, number, defaultN
         # we'll use standart Round Robin balancing stratege
         return(pickNext(defaultNodes, number))
     }
-
     # if schedule list is empty then we need to recalculate it
     if (length(scheduleList) == 0) {
         f <- systemHistory[[1]]
@@ -227,8 +232,10 @@ dynamicWeightAlgorithm <- function(systemHistory, scheduleList, number, defaultN
             nrow = 3,
             byrow = TRUE
         )
-
+        # print(performanceHistory)
         optimalAssignment <- solve_LSAP(performanceHistory)
+        # cat("\n")
+
         extractList <- function(it) { it[1] }
 
         scheduleList <- lapply(optimalAssignment, extractList)
@@ -240,7 +247,7 @@ dynamicWeightAlgorithm <- function(systemHistory, scheduleList, number, defaultN
     # pop next node number from scheduleList
     list[newScheduleList, targetNode] <- exoustedPickNext(scheduleList)
 
-    return(list(targetNode = targetNode[[1]], scheduleList = newScheduleList))
+    return(list(targetNode = targetNode[[1]] + 1, scheduleList = newScheduleList))
 }
 
 # Utils
@@ -522,7 +529,7 @@ performTransition <-
             lambda <- 0.1
         } else if (transition == 2) {
             # First node
-            lambda <- 0.7 * taskWeight
+            lambda <- 0.5 * taskWeight
             nodesState[[transition]] <- nodesState[[transition]] + lambda
             if (nodesState[[transition]] >= 30) {
                 # skip this task
@@ -548,7 +555,7 @@ performTransition <-
             detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
         } else if (transition == 4) {
             # Third node
-            lambda <- 0.2 * taskWeight
+            lambda <- 0.5 * taskWeight
 
             nodesState[[transition]] <- nodesState[[transition]] + lambda
             if (nodesState[[transition]] >= 25) {
@@ -733,16 +740,11 @@ main <- function(inputFunc, outputFunc, M, transitionsCount, tasksCount) {
             transitionNumber <- result
         }
 
-        #cat("[main] Transition number is: ", transitionNumber, "\n")
 
         # Creating matrix for results
         if (ncol(performanceLog) == 1 && allowedTransitions == conflictedTransitions) {
             performanceLog = createStatsMatrix(allowedTransitions)
         }
-
-        # if (!is.numeric(transitionNumber)) {
-        #     a <- 1111
-        # }
 
         for (m in 1:ncol(performanceLog)) {
             if (performanceLog[1, m] == transitionNumber) {
@@ -804,118 +806,119 @@ main <- function(inputFunc, outputFunc, M, transitionsCount, tasksCount) {
         }
     }
 
-    workingNodesCount <- 3
+    if (TRUE) {
+        workingNodesCount <- 3
+        # Results
+        # cat("\014") # Clear consosle output
+        header("System configuration")
 
-    # Results
-    # cat("\014") # Clear consosle output
-    header("System configuration")
+        cat("Balancing method:\t", balancingMethod, "\n")
+        cat("Working nodes count:\t", workingNodesCount, "\n")
+        cat("Input distribution:\t", "`Unknown value`", "\n")
+        cat("Transitions count:\t", transitionsCount, "\n")
+        cat("Tasks count to perform:\t", tasksCount, "\n")
 
-    cat("Balancing method:\t", balancingMethod, "\n")
-    cat("Working nodes count:\t", workingNodesCount, "\n")
-    cat("Input distribution:\t", "`Unknown value`", "\n")
-    cat("Transitions count:\t", transitionsCount, "\n")
-    cat("Tasks count to perform:\t", tasksCount, "\n")
+        header("System characteristics")
 
-    header("System characteristics")
+        subheader("Idle time")
 
-    subheader("Idle time")
+        cat("Idle time for 1st working node", sum(idleTimeForWorkingNodes[[1]]), "\n")
+        cat("Idle time for 2nd working node", sum(idleTimeForWorkingNodes[[2]]), "\n")
+        cat("Idle time for 3rd working node", sum(idleTimeForWorkingNodes[[3]]), "\n")
 
-    cat("Idle time for 1st working node", sum(idleTimeForWorkingNodes[[1]]), "\n")
-    cat("Idle time for 2nd working node", sum(idleTimeForWorkingNodes[[2]]), "\n")
-    cat("Idle time for 3rd working node", sum(idleTimeForWorkingNodes[[3]]), "\n")
+        subheader("Main characteristics")
 
-    subheader("Main characteristics")
+        cat("Tasks performed in 1st working node", performanceLog[2, 1], "(transition number:", performanceLog[1, 1], ")\n")
+        cat("Tasks performed in 2nd working node", performanceLog[2, 2], "(transition number:", performanceLog[1, 2], ")\n")
+        cat("Tasks performed in 3rd working node", performanceLog[2, 3], "(transition number:", performanceLog[1, 3], ")\n")
 
-    cat("Tasks performed in 1st working node", performanceLog[2, 1], "(transition number:", performanceLog[1, 1], ")\n")
-    cat("Tasks performed in 2nd working node", performanceLog[2, 2], "(transition number:", performanceLog[1, 2], ")\n")
-    cat("Tasks performed in 3rd working node", performanceLog[2, 3], "(transition number:", performanceLog[1, 3], ")\n")
+        # rownames(performanceLog) <- c("Transition", "Tasks count", "Loading")
+        # print(performanceLog)
 
-    # rownames(performanceLog) <- c("Transition", "Tasks count", "Loading")
-    # print(performanceLog)
+        subheader("Rejected tasks per node")
 
-    subheader("Rejected tasks per node")
+        cat("Node 1 rejected", rejectedTasks[[2]], "tasks\n")
+        cat("Node 2 rejected", rejectedTasks[[3]], "tasks\n")
+        cat("Node 3 rejected", rejectedTasks[[4]], "tasks\n")
 
-    cat("Node 1 rejected", rejectedTasks[[2]], "tasks\n")
-    cat("Node 2 rejected", rejectedTasks[[3]], "tasks\n")
-    cat("Node 3 rejected", rejectedTasks[[4]], "tasks\n")
+        subheader("Tasks performing per node")
 
-    subheader("Tasks performing per node")
+        firstNode <- detailedPerformanceLog[[1]]
+        secondNode <- detailedPerformanceLog[[2]]
+        thirdNode <- detailedPerformanceLog[[3]]
+        if (!is.null(firstNode)) {
+            cat("Node 1 task performing mean time: ", signif(mean(firstNode), 3), "\n")
+            cat("Node 1 tasks performing median time: ", signif(median(firstNode), 3), "\n")
+        } else {
+            firstNode <- NULL
+        }
 
-    firstNode <- detailedPerformanceLog[[1]]
-    secondNode <- detailedPerformanceLog[[2]]
-    thirdNode <- detailedPerformanceLog[[3]]
-    if (!is.null(firstNode)) {
-        cat("Node 1 task performing mean time: ", signif(mean(firstNode), 3), "\n")
-        cat("Node 1 tasks performing median time: ", signif(median(firstNode), 3), "\n")
-    } else {
-        firstNode <- NULL
+        if (!is.null(secondNode)) {
+            cat("Node 2 tasks performing mean time: ", signif(mean(secondNode), 3), "\n")
+            cat("Node 2 tasks performing median time: ", signif(median(secondNode), 3), "\n")
+        } else {
+            secondNode <- NULL
+        }
+
+        if (!is.null(thirdNode)) {
+            cat("Node 3 tasks performing mean time: ", signif(mean(thirdNode), 3), "\n")
+            cat("Node 3 tasks performing median time: ", signif(median(thirdNode), 3), "\n")
+        } else {
+            thirdNode <- NULL
+        }
+        subheader("Loading per nodes")
+
+        firstNodeLoading <- calculate_loading(performanceLog[3, 1], sum(idleTimeForWorkingNodes[[1]]))
+        cat("Loading of first working node is", firstNodeLoading, "\n")
+
+        secondNodeLoading <- calculate_loading(performanceLog[3, 2], sum(idleTimeForWorkingNodes[[2]]))
+        cat("Loading of second working node is", secondNodeLoading, "\n")
+
+        thirdNodeLoading <- calculate_loading(performanceLog[3, 3], sum(idleTimeForWorkingNodes[[3]]))
+        cat("Loading of third working node is", thirdNodeLoading, "\n")
+
+        subheader("Efficiency per nodes")
+
+        if (!is.null(firstNode)) {
+            firstNodeEfficiency <- calculate_efficiency(performanceLog[3, 1], sum(idleTimeForWorkingNodes[[1]]))
+            cat("Efficiency of first working node is", firstNodeEfficiency, "\n")
+        } else {
+            firstNodeEfficiency <- 0
+        }
+
+        if (!is.null(secondNode)) {
+            secondNodeEfficiency <- calculate_efficiency(performanceLog[3, 2], sum(idleTimeForWorkingNodes[[2]]))
+            cat("Efficiency of second working node is", secondNodeEfficiency, "\n")
+        } else {
+            secondNodeEfficiency <- 0
+        }
+
+        if (!is.null(thirdNode)) {
+            thirdNodeEfficiency <- calculate_efficiency(performanceLog[3, 3], sum(idleTimeForWorkingNodes[[3]]))
+            cat("Efficiency of third working node is", thirdNodeEfficiency, "\n")
+        } else {
+            thirdNodeEfficiency <- 0
+        }
+
+        subheader("Whole system result")
+
+        cat("Result system whole time: ", processTime, "\n")
+
+        wholeSystemEfficiency =  mean(c(firstNodeEfficiency, secondNodeEfficiency, thirdNodeEfficiency))
+        cat("Efficiency of whole system: ", signif(wholeSystemEfficiency, 3), "\n")
+        cat("Mean loading of whole system: ", signif(median(
+            c(median(firstNodeLoading), median(secondNodeLoading), median(thirdNodeLoading))
+        ), 3), "\n")
+        cat("Mean time of processing task in whole system:", mean(processLogForEveryTask), "\n")
+        cat("Rejected tasks in whole system:", rejectedTasks[[1]] + rejectedTasks[[2]] + rejectedTasks[[3]], "\n")
+
+        # makeAPlot(firstNode, secondNode)
     }
-
-    if (!is.null(secondNode)) {
-        cat("Node 2 tasks performing mean time: ", signif(mean(secondNode), 3), "\n")
-        cat("Node 2 tasks performing median time: ", signif(median(secondNode), 3), "\n")
-    } else {
-        secondNode <- NULL
-    }
-
-    if (!is.null(thirdNode)) {
-        cat("Node 3 tasks performing mean time: ", signif(mean(thirdNode), 3), "\n")
-        cat("Node 3 tasks performing median time: ", signif(median(thirdNode), 3), "\n")
-    } else {
-        thirdNode <- NULL
-    }
-    subheader("Loading per nodes")
-
-    firstNodeLoading <- calculate_loading(performanceLog[3, 1], sum(idleTimeForWorkingNodes[[1]]))
-    cat("Loading of first working node is", firstNodeLoading, "\n")
-
-    secondNodeLoading <- calculate_loading(performanceLog[3, 2], sum(idleTimeForWorkingNodes[[2]]))
-    cat("Loading of second working node is", secondNodeLoading, "\n")
-
-    thirdNodeLoading <- calculate_loading(performanceLog[3, 3], sum(idleTimeForWorkingNodes[[3]]))
-    cat("Loading of third working node is", thirdNodeLoading, "\n")
-
-    subheader("Efficiency per nodes")
-
-    if (!is.null(firstNode)) {
-        firstNodeEfficiency <- calculate_efficiency(performanceLog[3, 1], sum(idleTimeForWorkingNodes[[1]]))
-        cat("Efficiency of first working node is", firstNodeEfficiency, "\n")
-    } else {
-        firstNodeEfficiency <- 0
-    }
-
-    if (!is.null(secondNode)) {
-        secondNodeEfficiency <- calculate_efficiency(performanceLog[3, 2], sum(idleTimeForWorkingNodes[[2]]))
-        cat("Efficiency of second working node is", secondNodeEfficiency, "\n")
-    } else {
-        secondNodeEfficiency <- 0
-    }
-
-    if (!is.null(thirdNode)) {
-        thirdNodeEfficiency <- calculate_efficiency(performanceLog[3, 3], sum(idleTimeForWorkingNodes[[3]]))
-        cat("Efficiency of third working node is", thirdNodeEfficiency, "\n")
-    } else {
-        thirdNodeEfficiency <- 0
-    }
-
-    subheader("Whole system result")
-
-    cat("Result system whole time: ", processTime, "\n")
-
-    wholeSystemEfficiency =  mean(c(firstNodeEfficiency, secondNodeEfficiency, thirdNodeEfficiency))
-    cat("Efficiency of whole system: ", signif(wholeSystemEfficiency, 3), "\n")
-    cat("Mean loading of whole system: ", signif(median(
-        c(median(firstNodeLoading), median(secondNodeLoading), median(thirdNodeLoading))
-    ), 3), "\n")
-    cat("Mean time of processing task in whole system:", mean(processLogForEveryTask), "\n")
-    cat("Rejected tasks in whole system:", rejectedTasks[[1]] + rejectedTasks[[2]] + rejectedTasks[[3]], "\n")
-
-    # makeAPlot(firstNode, secondNode)
 }
 
 inputDistribution <- "hola!" # implement mech of input distribution
 transitionsCount <- 100000
-tasksCount <- 500
+tasksCount <- 100
 
 main(APlus,
      AMinus,
