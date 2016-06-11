@@ -1,5 +1,6 @@
 #https://raw.githubusercontent.com/ggrothendieck/gsubfn/master/R/list.R
 library(crayon)
+require("clue")
 
 error <- red$bold
 
@@ -77,30 +78,6 @@ testRequestsWeights = matrix(
     byrow = TRUE
 )
 
-
-# Implementations of algorithms for load balancing
-
-# Last succesful connectoin algorithm
-#' Title
-#'
-#' @return
-#' @export
-#'
-#' @examples
-pickNodeWithLeastConnections <- function() {
-
-}
-
-# Dynamic Weight Round Robin algorithm
-#' Title
-#'
-#' @return
-#' @export
-#'
-#' @examples
-dynamicWeightAlgorithm <- function() {
-
-}
 
 # Random algorithm
 #' Title
@@ -186,6 +163,85 @@ weightRoundRobin <- function(nodes, iteration) {
     pickByOrder(nodes, iteration)
 }
 
+
+# Implementations of algorithms for load balancing
+
+# Last succesful connectoin algorithm
+#' Title
+#'
+#' @return
+#' @export
+#'
+#' @examples
+pickNodeWithLeastConnections <- function() {
+
+}
+
+# Dynamic Weight Round Robin algorithm
+#' Title
+#'
+#' @return
+#' @export
+#'
+#' @examples
+
+exoustedPickNext <- function(schedule) {
+    if (length(schedule) == 0) {
+        return(list(NULL, NULL))
+    }
+
+    list(
+        head(schedule, length(schedule) - 1),
+        tail(schedule, 1)
+    )
+}
+
+algorithmSwitchStratege <- function(systemHistory) {
+    for (i in 1:length(systemHistory)) {
+        if (length(systemHistory[[i]]) < 3) {
+            return(FALSE)
+        }
+    }
+
+    TRUE
+}
+
+dynamicWeightAlgorithm <- function(systemHistory, scheduleList, number, defaultNodes) {
+    # if we don't need to change strateg to Hungarian
+    if (!algorithmSwitchStratege(systemHistory)) {
+        # we'll use standart Round Robin balancing stratege
+        return(pickNext(defaultNodes, number))
+    }
+
+    # if schedule list is empty then we need to recalculate it
+    if (length(scheduleList) == 0) {
+        f <- systemHistory[[1]]
+        s <- systemHistory[[2]]
+        t <- systemHistory[[3]]
+
+        performanceHistory <- matrix(
+            c(tail(f, 3)[1], tail(f, 3)[2], tail(f, 3)[3],
+              tail(s, 3)[1], tail(s, 3)[2], tail(s, 3)[3],
+              tail(t, 3)[1], tail(t, 3)[2], tail(t, 3)[3]),
+            ncol = 3,
+            nrow = 3,
+            byrow = TRUE
+        )
+
+        optimalAssignment <- solve_LSAP(performanceHistory)
+        extractList <- function(it) { it[1] }
+
+        scheduleList <- lapply(optimalAssignment, extractList)
+
+    }
+
+    targetNode <- NA
+    newScheduleList <- NA
+    # pop next node number from scheduleList
+    list[newScheduleList, targetNode] <- exoustedPickNext(scheduleList)
+
+    return(list(targetNode = targetNode[[1]], scheduleList = newScheduleList))
+}
 
 # Utils
 #' Title
@@ -363,7 +419,7 @@ getSystemCharacteristics <- function(timeOnOutput, idleTime, time1, time2, delta
 #' @export
 #'
 #' @examples
-resolveConflict <- function(method, nodes, iteration) {
+resolveConflict <- function(method, nodes, iteration, systemHistory, scheduleList) {
     if (method == "random") {
         randomBalancing(nodes)
     } else if (method == "roundRobin") {
@@ -372,8 +428,8 @@ resolveConflict <- function(method, nodes, iteration) {
         weightRoundRobin(nodes, iteration)
     } else if (method == "leastConnectoins") {
         pickNodeWithLeastConnections()
-    } else if (method == "dynamicWeightRoundRobin") {
-        pickNodeWithLeastConnections()
+    } else if (method == "dynamicWeightAlgorithm") {
+        dynamicWeightAlgorithm(systemHistory, scheduleList, iteration, nodes)
     } else {
         cat("There is " %+% error("no") %+% " such balancing method: ", method)
         stop("Error")
@@ -390,13 +446,13 @@ resolveConflict <- function(method, nodes, iteration) {
 #' @export
 #'
 #' @examples
-getTransitionNumberWithResolving <- function(nodes, iteration, method) {
+getTransitionNumberWithResolving <- function(nodes, iteration, method, systemHistory, scheduleList) {
     vectorLength <- length(nodes)
     q <- 1
     if (all(nodes == conflictedTransitions)) {
         conflictedNodes <- getNodesIds(nodes)
         transitionNumber <-
-            resolveConflict(method, conflictedNodes, iteration)
+            resolveConflict(method, conflictedNodes, iteration, systemHistory, scheduleList)
         return(transitionNumber)
     }
 
@@ -654,16 +710,39 @@ main <- function(inputFunc, outputFunc, M, transitionsCount, tasksCount) {
     rejectedTasks <- list(0, 0, 0, 0, 0, 0, 0, 0, 0)
     idleTimeForWorkingNodes <- list(c(), c(), c(), c(), c(), c(), c())
     currentPerformer <- NA
+    scheduleList <- NULL
+    transitionNumber <- NA
+    balancingMethod <- "dynamicWeightAlgorithm"
+    # balancingMethod <- "roundRobin"
+    # balancingMethod <- "random"
     for (i in 1:transitionsCount) {
         transposedVector <- t(M)
         allowedTransitions <- getAllowedTransitions(transposedVector, inputFunc)
-        transitionNumber <- getTransitionNumberWithResolving(allowedTransitions, i, "roundRobin")
+        result <- getTransitionNumberWithResolving(
+            allowedTransitions,
+            i,
+            balancingMethod,
+            detailedPerformanceLog,
+            scheduleList
+        )
+
+        if (is.list(result)) {
+            transitionNumber <- result$targetNode
+            scheduleList <- result$scheduleList
+        } else {
+            transitionNumber <- result
+        }
+
         #cat("[main] Transition number is: ", transitionNumber, "\n")
 
         # Creating matrix for results
         if (ncol(performanceLog) == 1 && allowedTransitions == conflictedTransitions) {
             performanceLog = createStatsMatrix(allowedTransitions)
         }
+
+        # if (!is.numeric(transitionNumber)) {
+        #     a <- 1111
+        # }
 
         for (m in 1:ncol(performanceLog)) {
             if (performanceLog[1, m] == transitionNumber) {
@@ -731,6 +810,7 @@ main <- function(inputFunc, outputFunc, M, transitionsCount, tasksCount) {
     # cat("\014") # Clear consosle output
     header("System configuration")
 
+    cat("Balancing method:\t", balancingMethod, "\n")
     cat("Working nodes count:\t", workingNodesCount, "\n")
     cat("Input distribution:\t", "`Unknown value`", "\n")
     cat("Transitions count:\t", transitionsCount, "\n")
@@ -835,7 +915,7 @@ main <- function(inputFunc, outputFunc, M, transitionsCount, tasksCount) {
 
 inputDistribution <- "hola!" # implement mech of input distribution
 transitionsCount <- 100000
-tasksCount <- 50
+tasksCount <- 500
 
 main(APlus,
      AMinus,

@@ -14,7 +14,14 @@ xx <- matrix(
 # Optimal assignment: 1 => 3, 2 => 1, 3 => 2, 4 => 4
 
 resolve <- function(matrix) {
-    solve_LSAP(matrix) # <- true resolving!!!
+    a <- solve_LSAP(matrix) # <- true resolving!!!
+    print(a)
+    f <- function(z) {
+        z[1]
+    }
+
+    print(lapply(a, f))
+
     solve_LSAP(matrix, maximum = TRUE)
 
     ## To get the optimal value (for now):
@@ -62,11 +69,10 @@ result <- resolve(xx)
 #     yaxs = "i"
 # )
 
-for (i in 1:12) {
-    cat(dbinom(i, size=12, prob=0.2), "\n")
-}
-
-
+# for (i in 1:12) {
+#     cat(dbinom(i, size=12, prob=0.2), "\n")
+# }
+#
 
 
 
