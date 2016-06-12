@@ -434,7 +434,7 @@ resolveConflict <- function(method, nodes, iteration, systemHistory, scheduleLis
     } else if (method == "roundRobin") {
         roundRobin(nodes, iteration)
     } else if (method == "weightRoundRobin") {
-        weightRoundRobin(nodes, iteration)
+        weightRoundRobin(c(3,2,4), iteration)
     } else if (method == "leastConnectoins") {
         pickNodeWithLeastConnections()
     } else if (method == "dynamicWeightAlgorithm") {
@@ -536,6 +536,7 @@ performTransition <-
         } else if (transition == 2) {
             # First node
             lambda <- 0.2 * taskWeight
+            # cat(transition + 1, ", ")
             nodesState[[transition]] <- nodesState[[transition]] + lambda
             if (nodesState[[transition]] >= firstNodeGap) {
                 # skip this task
@@ -549,6 +550,7 @@ performTransition <-
             # Second node
             lambda <- 0.5 * taskWeight
 
+            # cat(transition + 1, ", ")
             nodesState[[transition]] <- nodesState[[transition]] + lambda
             if (nodesState[[transition]] >= secondNodeGap) {
                 # skip this task
@@ -563,6 +565,7 @@ performTransition <-
             # Third node
             lambda <- 0.9 * taskWeight
 
+            # cat(transition + 1, ", ")
             nodesState[[transition]] <- nodesState[[transition]] + lambda
             if (nodesState[[transition]] >= thirdNodeGap) {
                 # skip this task
@@ -738,7 +741,8 @@ main <- function(inputFunc, outputFunc, M, transitionsCount, tasksCount) {
     scheduleList <- NULL
     transitionNumber <- NA
     # balancingMethod <- "dynamicWeightAlgorithm"
-    balancingMethod <- "roundRobin"
+    # balancingMethod <- "roundRobin"
+    balancingMethod <- "weightRoundRobin"
     # balancingMethod <- "random"
     for (i in 1:transitionsCount) {
         transposedVector <- t(M)
@@ -758,7 +762,6 @@ main <- function(inputFunc, outputFunc, M, transitionsCount, tasksCount) {
             transitionNumber <- result
         }
 
-
         # Creating matrix for results
         if (ncol(performanceLog) == 1 && allowedTransitions == conflictedTransitions) {
             performanceLog = createStatsMatrix(allowedTransitions)
@@ -768,7 +771,7 @@ main <- function(inputFunc, outputFunc, M, transitionsCount, tasksCount) {
             if (performanceLog[1, m] == transitionNumber) {
                 currentTaskWeight <- testRequestsWeights[performedTasksCount %% length(testRequestsWeights) + 1]
                 performedTasksCount <- performedTasksCount + 1
-                #cat("[main] Task number: ", tasksCount, "\n")
+                # cat("[main] Task number: ", tasksCount, "\n")
                 # Counting tasks amount
                 performanceLog[2, m] <- performanceLog[2, m] + 1
                 # Counting weight of tasks
@@ -825,7 +828,7 @@ main <- function(inputFunc, outputFunc, M, transitionsCount, tasksCount) {
     }
 
     if (TRUE) {
-        workingNodesCount <- 3
+        # workingNodesCount <- 3
         # Results
         # cat("\014") # Clear consosle output
         # header("System configuration")
