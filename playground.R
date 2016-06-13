@@ -20,8 +20,8 @@ resolve <- function(matrix) {
         z[1]
     }
 
-    print(lapply(a, f))
-
+    # print(lapply(a, f))
+#
     solve_LSAP(matrix, maximum = TRUE)
 
     ## To get the optimal value (for now):
@@ -31,7 +31,7 @@ resolve <- function(matrix) {
     return(z)
 }
 
-result <- resolve(xx)
+# result <- resolve(xx)
 #
 # print(result)
 # require(graphics)
@@ -80,13 +80,12 @@ result <- resolve(xx)
 
 
 
+a <- rbinom(1:20, size=40, prob=1/6)
+print(a)
 
+b <- rpois(1:20, 11)
 
-
-
-
-
-
+print(b)
 
 
 

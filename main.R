@@ -71,22 +71,6 @@ startingMarks = matrix(
     ncol = 10
 )
 
-testRequestsWeights = matrix(
-    c(1, 3, 2, 5, 9, 3, 6, 4, 9, 7, 4, 8, 4, 9, 6, 3, 4, 2, 1, 1),
-    nrow = 1,
-    ncol = 20,
-    byrow = TRUE
-)
-
-
-
-# testRequestsWeights = matrix(
-#     c(10, 3, 20, 5, 9, 30, 6, 4, 90, 7, 4, 80, 4, 90, 6, 3, 40, 2, 10, 10),
-#     nrow = 1,
-#     ncol = 20,
-#     byrow = TRUE
-# )
-
 # Random algorithm
 #' Title
 #'
@@ -710,19 +694,7 @@ calculate_loading <- function(workingTime, idleTime) {
 #' @export
 #'
 #' @examples
-
-testRequestsWeights = matrix(
-    c(1, 20, 30, 4, 15, 6),
-    nrow = 1,
-    ncol = 6,
-    byrow = TRUE
-)
-
-inputDistribution <- "hola!" # implement mech of input distribution
-transitionsCount <- 100000
-tasksCount <- 15000
-
-main <- function(inputFunc, outputFunc, M, transitionsCount, tasksCount) {
+main <- function(inputFunc, outputFunc, M, transitionsCount, tasksCount, distribution, balancingMethod) {
     commonFunc <- outputFunc - inputFunc
     performedTasksCount <- 0
 
@@ -740,10 +712,6 @@ main <- function(inputFunc, outputFunc, M, transitionsCount, tasksCount) {
     currentPerformer <- NA
     scheduleList <- NULL
     transitionNumber <- NA
-    # balancingMethod <- "dynamicWeightAlgorithm"
-    # balancingMethod <- "roundRobin"
-    balancingMethod <- "weightRoundRobin"
-    # balancingMethod <- "random"
     for (i in 1:transitionsCount) {
         transposedVector <- t(M)
         allowedTransitions <- getAllowedTransitions(transposedVector, inputFunc)
@@ -769,7 +737,7 @@ main <- function(inputFunc, outputFunc, M, transitionsCount, tasksCount) {
 
         for (m in 1:ncol(performanceLog)) {
             if (performanceLog[1, m] == transitionNumber) {
-                currentTaskWeight <- testRequestsWeights[performedTasksCount %% length(testRequestsWeights) + 1]
+                currentTaskWeight <- distribution[performedTasksCount %% length(distribution) + 1]
                 performedTasksCount <- performedTasksCount + 1
                 # cat("[main] Task number: ", tasksCount, "\n")
                 # Counting tasks amount
@@ -934,30 +902,41 @@ main <- function(inputFunc, outputFunc, M, transitionsCount, tasksCount) {
         cat("Rejected tasks in whole system:", rejectedTasks[[1]] + rejectedTasks[[2]] + rejectedTasks[[3]], "\n")
 
         # makeAPlot(firstNode, secondNode)
+        cat(replicate(20, "="),"\n")
     }
 }
 
-
-main(APlus,
-     AMinus,
-     startingMarks,
-     transitionsCount,
-     tasksCount)
-
-
-
-
+binomD <- rbinom(1:20, size = 40, prob = 1 / 6)
+poisD <- rpois(1:20, 11)
+cuD <- runif(1:20, min = 1, max = 3)
+pexpD <- pexp(1:20, rate = 1 / 3)
+normD <- pnorm(1:20, mean = 72, sd = 15.2, lower.tail = FALSE)
+chiD <- qchisq(.95, df = 7)
+studD <- qt(c(.025, .975), df = 5)
+FD <- qf(.95, df1 = 5, df2 = 2)
 
 
+transitionsCount <- 100000
+tasksCount <- 150
+# binomDistribution = matrix(c(do.call("cbind", binom)),  nrow = 1, ncol = 20, byrow = TRUE)
+# poisDistribution = matrix(c(do.call("cbind", pois)) , nrow = 1, ncol = 20, byrow = TRUE)
 
+myPartialMain <- pryr::partial(
+    main,
+    inputFunc = APlus,
+    outputFunc = AMinus,
+    M = startingMarks,
+    transitionsCount = transitionsCount,
+    tasksCount = tasksCount,
+    distribution = cu
+)
 
+myPartialMain(balancingMethod = "roundRobin")
+myPartialMain(balancingMethod = "weightRoundRobin")
+myPartialMain(balancingMethod = "random")
+myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
 
-
-
-
-
-
-
+# c(1, 20, 30, 4, 15, 6),
 
 
 
