@@ -911,9 +911,9 @@ poisD <- rpois(1:20, 11)
 cuD <- runif(1:20, min = 1, max = 3)
 pexpD <- pexp(1:20, rate = 1 / 3)
 normD <- pnorm(1:20, mean = 72, sd = 15.2, lower.tail = FALSE)
-chiD <- qchisq(.95, df = 7)
-studD <- qt(c(.025, .975), df = 5)
-FD <- qf(.95, df1 = 5, df2 = 2)
+chiD <- rchisq(1:20, df = 7)
+FD <- rf(1:20, df1 = 5, df2 = 2)
+studD <- rt(1:20, df = Inf) # !
 
 
 transitionsCount <- 100000
@@ -928,7 +928,7 @@ myPartialMain <- pryr::partial(
     M = startingMarks,
     transitionsCount = transitionsCount,
     tasksCount = tasksCount,
-    distribution = cu
+    distribution = FD
 )
 
 myPartialMain(balancingMethod = "roundRobin")
