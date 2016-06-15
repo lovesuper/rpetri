@@ -225,7 +225,7 @@ dynamicWeightAlgorithm <- function(systemHistory, scheduleList, number, defaultN
         extractList <- function(it) { it[1] }
 
         scheduleList <- lapply(optimalAssignment, extractList)
-
+        scheduleList <- rev(scheduleList) # !!!
     }
 
     targetNode <- NA
@@ -498,16 +498,23 @@ getTransitionTime <- function(currentTime, lambda) {
 #' @export
 #'
 #' @examples
+
 performTransition <-
     function(transition,
              processTime,
              taskWeight,
              detailedPerformanceLog,
              nodesState,
-             rejectedTasks) {
-        firstNodeGap <- 10
-        secondNodeGap <- 20
-        thirdNodeGap <- 35
+             rejectedTasks,
+             nodesPerfs,
+             nodesGaps) {
+        firstNodePerf <- nodesPerfs[[1]]
+        secondNodePerf <- nodesPerfs[[2]]
+        thirdNodePerf <- nodesPerfs[[3]]
+
+        firstNodeGap <- nodesGaps[[1]]
+        secondNodeGap <- nodesGaps[[2]]
+        thirdNodeGap <- nodesGaps[[3]]
 
         lambda <- 0.1
         transitionTime <- 0.0
@@ -519,7 +526,7 @@ performTransition <-
             lambda <- 0.1
         } else if (transition == 2) {
             # First node
-            lambda <- 0.2 * taskWeight
+            lambda <- firstNodePerf * taskWeight
             # cat(transition + 1, ", ")
             nodesState[[transition]] <- nodesState[[transition]] + lambda
             if (nodesState[[transition]] >= firstNodeGap) {
@@ -527,12 +534,13 @@ performTransition <-
                 rejectedTasks[[transition]] = rejectedTasks[[transition]] + 1
                 nodesState[[transition]] <- 0
             } else {
+                # nodesState[[transition]] <- nodesState[[transition]] / 10
             }
             currentPerformer <- transition
             detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
         } else if (transition == 3) {
             # Second node
-            lambda <- 0.5 * taskWeight
+            lambda <- secondNodePerf * taskWeight
 
             # cat(transition + 1, ", ")
             nodesState[[transition]] <- nodesState[[transition]] + lambda
@@ -541,13 +549,14 @@ performTransition <-
                 rejectedTasks[[transition]] = rejectedTasks[[transition]] + 1
                 nodesState[[transition]] <- 0
             } else {
+                # nodesState[[transition]] <- nodesState[[transition]] / 10
             }
 
             currentPerformer <- transition
             detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
         } else if (transition == 4) {
             # Third node
-            lambda <- 0.9 * taskWeight
+            lambda <- thirdNodePerf * taskWeight
 
             # cat(transition + 1, ", ")
             nodesState[[transition]] <- nodesState[[transition]] + lambda
@@ -556,6 +565,7 @@ performTransition <-
                 rejectedTasks[[transition]] = rejectedTasks[[transition]] + 1
                 nodesState[[transition]] <- 0
             } else {
+                # nodesState[[transition]] <- nodesState[[transition]] / 10
             }
 
             currentPerformer <- transition
@@ -694,10 +704,18 @@ calculate_loading <- function(workingTime, idleTime) {
 #' @export
 #'
 #' @examples
-main <- function(inputFunc, outputFunc, M, transitionsCount, tasksCount, distribution, balancingMethod) {
+main <- function(inputFunc,
+                 outputFunc,
+                 M,
+                 transitionsCount,
+                 tasksCount,
+                 distribution,
+                 balancingMethod,
+                 nodesPerfs,
+                 nodesGaps) {
     commonFunc <- outputFunc - inputFunc
     performedTasksCount <- 0
-
+    print(distribution)
     # Summary performance log for every processing unit
     performanceLog <- matrix(c(0, 0, 0), nrow = 3, ncol = 1, byrow = TRUE)
 
@@ -757,7 +775,9 @@ main <- function(inputFunc, outputFunc, M, transitionsCount, tasksCount, distrib
             currentTaskWeight,
             detailedPerformanceLog,
             nodesState,
-            rejectedTasks
+            rejectedTasks,
+            nodesPerfs,
+            nodesGaps
         )
         if (!is.na(newCurrentPerformer)) {
             currentPerformer <- newCurrentPerformer
@@ -906,8 +926,8 @@ main <- function(inputFunc, outputFunc, M, transitionsCount, tasksCount, distrib
     }
 }
 
-binomD <- rbinom(1:20, size = 40, prob = 1 / 6)
-poisD <- rpois(1:20, 11)
+binomD <- rbinom(1:30, size = 40, prob = 1 / 6)
+poisD <- rpois(1:20, 24)
 cuD <- runif(1:20, min = 1, max = 3)
 pexpD <- pexp(1:20, rate = 1 / 3)
 normD <- pnorm(1:20, mean = 72, sd = 15.2, lower.tail = FALSE)
@@ -915,9 +935,12 @@ chiD <- rchisq(1:20, df = 7)
 FD <- rf(1:20, df1 = 5, df2 = 2)
 studD <- rt(1:20, df = Inf) # !
 
+nodesPerfs <- list(0.1, 0.5, 0.3)
+nodesGaps <- list(21, 22, 13)
 
-transitionsCount <- 100000
-tasksCount <- 150
+transitionsCount <- 1000
+tasksCount <- 0
+
 # binomDistribution = matrix(c(do.call("cbind", binom)),  nrow = 1, ncol = 20, byrow = TRUE)
 # poisDistribution = matrix(c(do.call("cbind", pois)) , nrow = 1, ncol = 20, byrow = TRUE)
 
@@ -928,12 +951,15 @@ myPartialMain <- pryr::partial(
     M = startingMarks,
     transitionsCount = transitionsCount,
     tasksCount = tasksCount,
-    distribution = FD
+    # distribution = c(1, 20, 30, 4, 15, 6),
+    distribution = poisD,
+    nodesPerfs = nodesPerfs,
+    nodesGaps = nodesGaps
 )
 
 myPartialMain(balancingMethod = "roundRobin")
 myPartialMain(balancingMethod = "weightRoundRobin")
-myPartialMain(balancingMethod = "random")
+# myPartialMain(balancingMethod = "random")
 myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
 
 # c(1, 20, 30, 4, 15, 6),
