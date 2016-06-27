@@ -30,8 +30,15 @@ resolve <- function(matrix) {
 
     return(z)
 }
-
-# result <- resolve(xx)
+xx <- matrix(
+    c(2, 1, 1,
+      4, 2, 4,
+      1, 9, 4),
+    ncol = 3,
+    nrow = 3,
+    byrow = TRUE
+)
+result <- resolve(xx)
 #
 # print(result)
 # require(graphics)
@@ -79,13 +86,13 @@ resolve <- function(matrix) {
 
 
 
-
-a <- rbinom(1:20, size=40, prob=1/6)
-print(a)
-
-b <- rpois(1:20, 11)
-
-print(b)
+#
+# a <- rbinom(1:20, size=40, prob=1/6)
+# print(a)
+#
+# b <- rpois(1:20, 11)
+#
+# print(b)
 
 
 

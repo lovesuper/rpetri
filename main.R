@@ -676,6 +676,7 @@ makeAPlot <- function(firstNode, secondNode) {
     )
 
 }
+
 header <- function(text) {
     cat("\n[", toupper(text), "]\n")
 }
@@ -714,8 +715,9 @@ main <- function(inputFunc,
                  nodesPerfs,
                  nodesGaps) {
     commonFunc <- outputFunc - inputFunc
+    # print(commonFunc)
     performedTasksCount <- 0
-    print(distribution)
+    # print(distribution)
     # Summary performance log for every processing unit
     performanceLog <- matrix(c(0, 0, 0), nrow = 3, ncol = 1, byrow = TRUE)
 
@@ -803,9 +805,23 @@ main <- function(inputFunc,
             # cat("[main] Idle time for loop:", idleTimeForLoop,
             #     "working node\t№", currentPerformer, "\n"
             # )
+            if (i >= 3) {
+                # firstNodeLoading <- calculate_loading(performanceLog[3, 1], idleTimeForWorkingNodes[[1]])
+                # secondNodeLoading <- calculate_loading(performanceLog[3, 2], idleTimeForWorkingNodes[[2]])
+                # thirdNodeLoading <- calculate_loading(performanceLog[3, 3], idleTimeForWorkingNodes[[3]])
+                # systemLoading <- signif(
+                #         median(
+                #             c(median(firstNodeLoading), median(secondNodeLoading), median(thirdNodeLoading)
+                #         )
+                #     ), 3
+                # )
+                # cat(timeForCycle, ", ")
+            }
+
             processLogForEveryTask <- c(processLogForEveryTask, c(timeForCycle))
             processTime <- processTime + timeForCycle
             timeForCycle <- 0.0
+
         }
 
         M <- t(startingVector) %*% commonFunc + M
@@ -813,6 +829,8 @@ main <- function(inputFunc,
             #cat("[main] Tasks are closed\n")
             break()
         }
+
+
     }
 
     if (TRUE) {
@@ -923,6 +941,64 @@ main <- function(inputFunc,
 
         # makeAPlot(firstNode, secondNode)
         cat(replicate(20, "="),"\n")
+
+
+        cat(length(processLogForEveryTask))
+
+        # MAKING FIRST PLOT
+
+        g_range <- range(0, processLogForEveryTask, 20)
+        plot(
+            processLogForEveryTask,
+            type = "o",
+            col = "black",
+            ylim = g_range
+        )
+        # smoothingSpline = smooth.spline(processLogForEveryTask, spar=0.35)
+
+        # Make x axis using Mon-Fri labels
+        # axis(1,
+        #      at = 1:5,
+        #      lab = c("Mon", "Tue", "Wed", "Thu", "Fri"))
+
+        # Make y axis with horizontal labels that display ticks at
+        # every 4 marks. 4*0:g_range[2] is equivalent to c(0,4,8,12).
+        # axis(2, las = 1, at = 4 * 0:g_range[2])
+
+        # Create box around plot
+        # box()
+
+        # Graph trucks with red dashed line and square points
+        # lines(
+        #     secondNode,
+        #     type = "o",
+        #     pch = 22,
+        #     lty = 2,
+        #     col = "red"
+        # )
+
+        # Create a title with a red, bold/italic font
+        title(main = "Время нахождения заявки в системе",
+              col.main = "black",
+              font.main = 4)
+
+        # Label the x and y axes with dark green text
+        title(xlab = "Time", col.lab = rgb(0, 0.5, 0))
+        title(ylab = "Value", col.lab = rgb(0, 0.5, 0))
+
+        # Create a legend at (1, g_range[2]) that is slightly smaller
+        # (cex) and uses the same line colors and points used by
+        # the actual plots
+        legend(
+            1,
+            g_range[2],
+            c("Время прохода"),
+            cex = 0.8,
+            col = c("black"),
+            pch = 21:22,
+            lty = 1:2
+        )
+
     }
 }
 
@@ -938,7 +1014,7 @@ studD <- rt(1:20, df = Inf) # !
 nodesPerfs <- list(0.1, 0.5, 0.3)
 nodesGaps <- list(21, 22, 13)
 
-transitionsCount <- 1000
+transitionsCount <- 10000
 tasksCount <- 0
 
 # binomDistribution = matrix(c(do.call("cbind", binom)),  nrow = 1, ncol = 20, byrow = TRUE)
@@ -958,13 +1034,13 @@ myPartialMain <- pryr::partial(
 )
 
 myPartialMain(balancingMethod = "roundRobin")
-myPartialMain(balancingMethod = "weightRoundRobin")
+# myPartialMain(balancingMethod = "weightRoundRobin")
 # myPartialMain(balancingMethod = "random")
-myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
+# myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
 
 # c(1, 20, 30, 4, 15, 6),
 
-
+# Сделать эксперимент с меняющимися настройками сервера во времени
 
 
 
