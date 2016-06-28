@@ -943,17 +943,17 @@ main <- function(inputFunc,
         cat(replicate(20, "="),"\n")
 
 
-        cat(length(processLogForEveryTask))
+        # cat(length(processLogForEveryTask))
 
         # MAKING FIRST PLOT
 
-        g_range <- range(0, processLogForEveryTask, 20)
-        plot(
-            processLogForEveryTask,
-            type = "o",
-            col = "black",
-            ylim = g_range
-        )
+        # g_range <- range(0, processLogForEveryTask, 20)
+        # plot(
+        #     processLogForEveryTask,
+        #     type = "o",
+        #     col = "black",
+        #     ylim = g_range
+        # )
         # smoothingSpline = smooth.spline(processLogForEveryTask, spar=0.35)
 
         # Make x axis using Mon-Fri labels
@@ -978,27 +978,33 @@ main <- function(inputFunc,
         # )
 
         # Create a title with a red, bold/italic font
-        title(main = "Время нахождения заявки в системе",
-              col.main = "black",
-              font.main = 4)
+        # title(main = "Время нахождения заявки в системе",
+        #       col.main = "black",
+        #       font.main = 4)
 
         # Label the x and y axes with dark green text
-        title(xlab = "Time", col.lab = rgb(0, 0.5, 0))
-        title(ylab = "Value", col.lab = rgb(0, 0.5, 0))
+        # title(xlab = "Time", col.lab = rgb(0, 0.5, 0))
+        # title(ylab = "Value", col.lab = rgb(0, 0.5, 0))
 
         # Create a legend at (1, g_range[2]) that is slightly smaller
         # (cex) and uses the same line colors and points used by
         # the actual plots
-        legend(
-            1,
-            g_range[2],
-            c("Время прохода"),
-            cex = 0.8,
-            col = c("black"),
-            pch = 21:22,
-            lty = 1:2
-        )
+        # legend(
+        #     1,
+        #     g_range[2],
+        #     c("Время прохода"),
+        #     cex = 0.8,
+        #     col = c("black"),
+        #     pch = 21:22,
+        #     lty = 1:2
+        # )
 
+        dat <- data.frame(x=1:length(processLogForEveryTask), y=processLogForEveryTask)
+        a <- approx(dat$x, dat$y)
+        af <- approxfun(dat$x, dat$y)
+        # points(a, pch=2)
+        curve(af, add=TRUE)
+        plot(dat)
     }
 }
 
@@ -1014,7 +1020,7 @@ studD <- rt(1:20, df = Inf) # !
 nodesPerfs <- list(0.1, 0.5, 0.3)
 nodesGaps <- list(21, 22, 13)
 
-transitionsCount <- 10000
+transitionsCount <- 1000
 tasksCount <- 0
 
 # binomDistribution = matrix(c(do.call("cbind", binom)),  nrow = 1, ncol = 20, byrow = TRUE)
