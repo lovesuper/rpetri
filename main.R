@@ -515,7 +515,7 @@ performTransition <-
         firstNodeGap <- nodesGaps[[1]]
         secondNodeGap <- nodesGaps[[2]]
         thirdNodeGap <- nodesGaps[[3]]
-
+        taskExcTime <- NULL
         lambda <- 0.1
         transitionTime <- 0.0
         currentPerformer <- NA
@@ -536,6 +536,7 @@ performTransition <-
             } else {
                 # nodesState[[transition]] <- nodesState[[transition]] / 10
             }
+            taskExcTime <- lambda
             currentPerformer <- transition
             detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
         } else if (transition == 3) {
@@ -551,7 +552,7 @@ performTransition <-
             } else {
                 # nodesState[[transition]] <- nodesState[[transition]] / 10
             }
-
+            taskExcTime <- lambda
             currentPerformer <- transition
             detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
         } else if (transition == 4) {
@@ -567,7 +568,7 @@ performTransition <-
             } else {
                 # nodesState[[transition]] <- nodesState[[transition]] / 10
             }
-
+            taskExcTime <- lambda
             currentPerformer <- transition
             detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
         } else if (transition == 5) {
@@ -587,7 +588,7 @@ performTransition <-
         transitionTime <- lambda
         processTime <- processTime + transitionTime
 
-        list(processTime, detailedPerformanceLog, nodesState, rejectedTasks, currentPerformer)
+        list(processTime, detailedPerformanceLog, nodesState, rejectedTasks, currentPerformer, taskExcTime)
     }
 
 #' Title
@@ -711,38 +712,31 @@ main <- function(inputFunc,
                  transitionsCount,
                  tasksCount,
                  distribution,
+                 distributionName,
                  balancingMethod,
                  nodesPerfs,
                  nodesGaps) {
     commonFunc <- outputFunc - inputFunc
-    # print(commonFunc)
     performedTasksCount <- 0
-    # print(distribution)
-    # Summary performance log for every processing unit
     performanceLog <- matrix(c(0, 0, 0), nrow = 3, ncol = 1, byrow = TRUE)
-
-    # Detailed Performance Log for every processing unit
     detailedPerformanceLog <- list(c(), c(), c())
-    processLogForEveryTask <- c()
+    timeForCyclesVector <- c()
     processTime <- 0.0
     timeForCycle <- 0.0
+    # may be used for nodesStatesVector !
     nodesState <- list(0, 0, 0, 0, 0, 0, 0, 0, 0)
     rejectedTasks <- list(0, 0, 0, 0, 0, 0, 0, 0, 0)
     idleTimeForWorkingNodes <- list(c(), c(), c(), c(), c(), c(), c())
     currentPerformer <- NA
+    # schedule list for DWRR
     scheduleList <- NULL
     transitionNumber <- NA
+    # list of times of excecutions for nodes
+    tasksExcecutionTimeVector <- c()
     for (i in 1:transitionsCount) {
         transposedVector <- t(M)
         allowedTransitions <- getAllowedTransitions(transposedVector, inputFunc)
-        result <- getTransitionNumberWithResolving(
-            allowedTransitions,
-            i,
-            balancingMethod,
-            detailedPerformanceLog,
-            scheduleList
-        )
-
+        result <- getTransitionNumberWithResolving(allowedTransitions, i, balancingMethod, detailedPerformanceLog, scheduleList)
         if (is.list(result)) {
             transitionNumber <- result$targetNode
             scheduleList <- result$scheduleList
@@ -759,7 +753,6 @@ main <- function(inputFunc,
             if (performanceLog[1, m] == transitionNumber) {
                 currentTaskWeight <- distribution[performedTasksCount %% length(distribution) + 1]
                 performedTasksCount <- performedTasksCount + 1
-                # cat("[main] Task number: ", tasksCount, "\n")
                 # Counting tasks amount
                 performanceLog[2, m] <- performanceLog[2, m] + 1
                 # Counting weight of tasks
@@ -771,7 +764,9 @@ main <- function(inputFunc,
         newNodesState <- NA
         newRejectedTasks <- NA
         newCurrentPerformer <- NA
-        list[newProccesTime, detailedPerformanceLog, newNodesState, newRejectedTasks, newCurrentPerformer] <- performTransition(
+        newLambda <- NA
+        list[newProccesTime, detailedPerformanceLog, newNodesState,
+             newRejectedTasks, newCurrentPerformer, newLambda] <- performTransition(
             transitionNumber,
             timeForCycle,
             currentTaskWeight,
@@ -785,26 +780,18 @@ main <- function(inputFunc,
             currentPerformer <- newCurrentPerformer
         }
 
+        tasksExcecutionTimeVector <- c(tasksExcecutionTimeVector, newLambda)
         nodesState <- newNodesState
         rejectedTasks <- newRejectedTasks
         timeForCycle <- newProccesTime
 
         startingVector <- createStartingVector(allowedTransitions)
         if (transitionNumber == nrow(commonFunc)) {
-            # cat("[main] Idle time for loop:",
-            #     timeForCycle,
-            #     "minus",
-            #     tail(detailedPerformanceLog[[currentPerformer - 1]], 1),
-            #     "working node\t№", currentPerformer,
-            #     "\n"
-            # )
             idleTimeForLoop <- timeForCycle - tail(detailedPerformanceLog[[currentPerformer - 1]], 1)
             idleTimeForWorkingNodes[[currentPerformer - 1]] <- c(
                 idleTimeForWorkingNodes[[currentPerformer - 1]], idleTimeForLoop
             )
-            # cat("[main] Idle time for loop:", idleTimeForLoop,
-            #     "working node\t№", currentPerformer, "\n"
-            # )
+            # if wwrr is enabled
             if (i >= 3) {
                 # firstNodeLoading <- calculate_loading(performanceLog[3, 1], idleTimeForWorkingNodes[[1]])
                 # secondNodeLoading <- calculate_loading(performanceLog[3, 2], idleTimeForWorkingNodes[[2]])
@@ -818,58 +805,38 @@ main <- function(inputFunc,
                 # cat(timeForCycle, ", ")
             }
 
-            processLogForEveryTask <- c(processLogForEveryTask, c(timeForCycle))
+            timeForCyclesVector <- c(timeForCyclesVector, c(timeForCycle))
             processTime <- processTime + timeForCycle
             timeForCycle <- 0.0
-
         }
 
         M <- t(startingVector) %*% commonFunc + M
         if (tasksCount > 0 && performedTasksCount == tasksCount) {
-            #cat("[main] Tasks are closed\n")
             break()
         }
-
 
     }
 
     if (TRUE) {
-        # workingNodesCount <- 3
-        # Results
-        # cat("\014") # Clear consosle output
-        # header("System configuration")
-        #
         cat("Balancing method:\t", balancingMethod, "\n")
-        # cat("Working nodes count:\t", workingNodesCount, "\n")
-        # cat("Input distribution:\t", "`Unknown value`", "\n")
-        # cat("Transitions count:\t", transitionsCount, "\n")
-        # cat("Tasks count to perform:\t", tasksCount, "\n")
-        #
+        cat("Working nodes count:\t", 3, "\n")
+        cat("Input distribution:\t", distributionName, "\n")
+        cat("[xor with next] Transitions count:\t", transitionsCount, "\n")
+        cat("[xor with prev] Tasks count to perform:\t", tasksCount, "\n")
         # header("System characteristics")
-        #
-        # subheader("Idle time")
-        #
         # cat("Idle time for 1st working node", sum(idleTimeForWorkingNodes[[1]]), "\n")
         # cat("Idle time for 2nd working node", sum(idleTimeForWorkingNodes[[2]]), "\n")
         # cat("Idle time for 3rd working node", sum(idleTimeForWorkingNodes[[3]]), "\n")
-        #
-        # subheader("Main characteristics")
-        #
         # cat("Tasks performed in 1st working node", performanceLog[2, 1], "(transition number:", performanceLog[1, 1], ")\n")
         # cat("Tasks performed in 2nd working node", performanceLog[2, 2], "(transition number:", performanceLog[1, 2], ")\n")
         # cat("Tasks performed in 3rd working node", performanceLog[2, 3], "(transition number:", performanceLog[1, 3], ")\n")
-
         # rownames(performanceLog) <- c("Transition", "Tasks count", "Loading")
         # print(performanceLog)
-
         # subheader("Rejected tasks per node")
-
         # cat("Node 1 rejected", rejectedTasks[[2]], "tasks\n")
         # cat("Node 2 rejected", rejectedTasks[[3]], "tasks\n")
         # cat("Node 3 rejected", rejectedTasks[[4]], "tasks\n")
-
         # subheader("Tasks performing per node")
-
         firstNode <- detailedPerformanceLog[[1]]
         secondNode <- detailedPerformanceLog[[2]]
         thirdNode <- detailedPerformanceLog[[3]]
@@ -893,19 +860,13 @@ main <- function(inputFunc,
         } else {
             thirdNode <- NULL
         }
-        # subheader("Loading per nodes")
 
         firstNodeLoading <- calculate_loading(performanceLog[3, 1], sum(idleTimeForWorkingNodes[[1]]))
         # cat("Loading of first working node is", firstNodeLoading, "\n")
-
         secondNodeLoading <- calculate_loading(performanceLog[3, 2], sum(idleTimeForWorkingNodes[[2]]))
         # cat("Loading of second working node is", secondNodeLoading, "\n")
-
         thirdNodeLoading <- calculate_loading(performanceLog[3, 3], sum(idleTimeForWorkingNodes[[3]]))
         # cat("Loading of third working node is", thirdNodeLoading, "\n")
-
-        # subheader("Efficiency per nodes")
-
         if (!is.null(firstNode)) {
             firstNodeEfficiency <- calculate_efficiency(performanceLog[3, 1], sum(idleTimeForWorkingNodes[[1]]))
             # cat("Efficiency of first working node is", firstNodeEfficiency, "\n")
@@ -927,87 +888,47 @@ main <- function(inputFunc,
             thirdNodeEfficiency <- 0
         }
 
-        # subheader("Whole system result")
-
-        # cat("Result system whole time: ", processTime, "\n")
-
+        cat("Result system whole time: ", processTime, "\n")
         wholeSystemEfficiency =  mean(c(firstNodeEfficiency, secondNodeEfficiency, thirdNodeEfficiency))
         cat("Efficiency of whole system: ", signif(wholeSystemEfficiency, 3), "\n")
         cat("Mean loading of whole system: ", signif(median(
             c(median(firstNodeLoading), median(secondNodeLoading), median(thirdNodeLoading))
         ), 3), "\n")
-        cat("Mean time of processing task in whole system:", mean(processLogForEveryTask), "\n")
+        cat("Mean time of processing task in whole system:", mean(timeForCyclesVector), "\n")
         cat("Rejected tasks in whole system:", rejectedTasks[[1]] + rejectedTasks[[2]] + rejectedTasks[[3]], "\n")
-
-        # makeAPlot(firstNode, secondNode)
         cat(replicate(20, "="),"\n")
 
+        # --- OUTPUT DATA ---
 
-        # cat(length(processLogForEveryTask))
+        # Total vector per task excecution time
+        tasksExcecutionTimeVector
 
-        # MAKING FIRST PLOT
+        # Detailed Performance Log for every processing unit
+        detailedPerformanceLog
 
-        # g_range <- range(0, processLogForEveryTask, 20)
-        # plot(
-        #     processLogForEveryTask,
-        #     type = "o",
-        #     col = "black",
-        #     ylim = g_range
-        # )
-        # smoothingSpline = smooth.spline(processLogForEveryTask, spar=0.35)
+        # Total performed tasks count
+        performedTasksCount
 
-        # Make x axis using Mon-Fri labels
-        # axis(1,
-        #      at = 1:5,
-        #      lab = c("Mon", "Tue", "Wed", "Thu", "Fri"))
+        # Summary performance log
+        performanceLog
 
-        # Make y axis with horizontal labels that display ticks at
-        # every 4 marks. 4*0:g_range[2] is equivalent to c(0,4,8,12).
-        # axis(2, las = 1, at = 4 * 0:g_range[2])
+        # Total process time
+        processTime
 
-        # Create box around plot
-        # box()
+        # Time for cycles vector
+        timeForCyclesVector
 
-        # Graph trucks with red dashed line and square points
-        # lines(
-        #     secondNode,
-        #     type = "o",
-        #     pch = 22,
-        #     lty = 2,
-        #     col = "red"
-        # )
+        # Rejected tasks
+        rejectedTasks
 
-        # Create a title with a red, bold/italic font
-        # title(main = "Время нахождения заявки в системе",
-        #       col.main = "black",
-        #       font.main = 4)
-
-        # Label the x and y axes with dark green text
-        # title(xlab = "Time", col.lab = rgb(0, 0.5, 0))
-        # title(ylab = "Value", col.lab = rgb(0, 0.5, 0))
-
-        # Create a legend at (1, g_range[2]) that is slightly smaller
-        # (cex) and uses the same line colors and points used by
-        # the actual plots
-        # legend(
-        #     1,
-        #     g_range[2],
-        #     c("Время прохода"),
-        #     cex = 0.8,
-        #     col = c("black"),
-        #     pch = 21:22,
-        #     lty = 1:2
-        # )
-
-        dat <- data.frame(x=1:length(processLogForEveryTask), y=processLogForEveryTask)
-        a <- approx(dat$x, dat$y)
-        af <- approxfun(dat$x, dat$y)
-        # points(a, pch=2)
-        curve(af, add=TRUE)
-        plot(dat)
+        # Idle time for working nodes
+        idleTimeForWorkingNodes
     }
 }
 
+cat("\014") # Clear consosle output
+
+# INPUT DATA
 binomD <- rbinom(1:30, size = 40, prob = 1 / 6)
 poisD <- rpois(1:20, 24)
 cuD <- runif(1:20, min = 1, max = 3)
@@ -1016,16 +937,12 @@ normD <- pnorm(1:20, mean = 72, sd = 15.2, lower.tail = FALSE)
 chiD <- rchisq(1:20, df = 7)
 FD <- rf(1:20, df1 = 5, df2 = 2)
 studD <- rt(1:20, df = Inf) # !
-
 nodesPerfs <- list(0.1, 0.5, 0.3)
 nodesGaps <- list(21, 22, 13)
-
 transitionsCount <- 1000
-tasksCount <- 0
-
+tasksCount <- 500
 # binomDistribution = matrix(c(do.call("cbind", binom)),  nrow = 1, ncol = 20, byrow = TRUE)
 # poisDistribution = matrix(c(do.call("cbind", pois)) , nrow = 1, ncol = 20, byrow = TRUE)
-
 myPartialMain <- pryr::partial(
     main,
     inputFunc = APlus,
@@ -1035,6 +952,7 @@ myPartialMain <- pryr::partial(
     tasksCount = tasksCount,
     # distribution = c(1, 20, 30, 4, 15, 6),
     distribution = poisD,
+    distributionName = "poisD",
     nodesPerfs = nodesPerfs,
     nodesGaps = nodesGaps
 )
@@ -1047,7 +965,3 @@ myPartialMain(balancingMethod = "roundRobin")
 # c(1, 20, 30, 4, 15, 6),
 
 # Сделать эксперимент с меняющимися настройками сервера во времени
-
-
-
-

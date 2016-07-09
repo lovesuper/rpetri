@@ -31,3 +31,65 @@ af <- approxfun(dat$x, dat$y)
 # points(a, pch=2)
 plot(dat)
 curve(af, add=TRUE)
+
+
+# MAKING FIRST PLOT
+
+g_range <- range(0, lambdasList, 1)
+plot(
+    lambdasList,
+    type = "o",
+    col = "black",
+    ylim = g_range
+)
+smoothingSpline = smooth.spline(lambdasList, spar=0.35)
+
+# Make x axis using Mon-Fri labels
+# axis(1,
+#      at = 1:5,
+#      lab = c("Mon", "Tue", "Wed", "Thu", "Fri"))
+
+# Make y axis with horizontal labels that display ticks at
+# every 4 marks. 4*0:g_range[2] is equivalent to c(0,4,8,12).
+axis(2, las = 1, at = 4 * 0:g_range[2])
+
+# Create box around plot
+box()
+
+# Graph trucks with red dashed line and square points
+# lines(
+#     secondNode,
+#     type = "o",
+#     pch = 22,
+#     lty = 2,
+#     col = "red"
+# )
+
+# Create a title with a red, bold/italic font
+# title(main = "Время нахождения заявки в системе",
+#       col.main = "black",
+#       font.main = 4)
+
+# Label the x and y axes with dark green text
+# title(xlab = "Time", col.lab = rgb(0, 0.5, 0))
+# title(ylab = "Value", col.lab = rgb(0, 0.5, 0))
+
+# Create a legend at (1, g_range[2]) that is slightly smaller
+# (cex) and uses the same line colors and points used by
+# the actual plots
+# legend(
+#     1,
+#     g_range[2],
+#     c("Время прохода"),
+#     cex = 0.8,
+#     col = c("black"),
+#     pch = 21:22,
+#     lty = 1:2
+# )
+
+# dat <- data.frame(x=1:length(lambdasList), y=lambdasList)
+# a <- approx(dat$x, dat$y)
+# af <- approxfun(dat$x, dat$y)
+# points(a, pch=2)
+# curve(af, add=TRUE)
+# plot(dat)
