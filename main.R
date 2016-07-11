@@ -902,27 +902,29 @@ main <- function(inputFunc,
 
         # Total vector per task excecution time
         tasksExcecutionTimeVector
-
         # Detailed Performance Log for every processing unit
         detailedPerformanceLog
-
         # Total performed tasks count
         performedTasksCount
-
         # Summary performance log
         performanceLog
-
         # Total process time
         processTime
-
         # Time for cycles vector
         timeForCyclesVector
-
         # Rejected tasks
         rejectedTasks
-
         # Idle time for working nodes
         idleTimeForWorkingNodes
+
+        x <- 1:length(tasksExcecutionTimeVector)
+        img <- paste("~/Downloads/", balancingMethod, ".jpeg", sep="")
+        png(file = img)
+        plot(x, tasksExcecutionTimeVector, type = "n")
+        par(mar = c(2,2,2,2), pin = c(5,2))
+        points(approx(x, tasksExcecutionTimeVector), type = "l", col = 1, lwd = 2)
+        dev.off()
+        # dev.print(png, img)
     }
 }
 
@@ -939,8 +941,8 @@ FD <- rf(1:20, df1 = 5, df2 = 2)
 studD <- rt(1:20, df = Inf) # !
 nodesPerfs <- list(0.1, 0.5, 0.3)
 nodesGaps <- list(21, 22, 13)
-transitionsCount <- 1000
-tasksCount <- 500
+transitionsCount <- 10000
+tasksCount <- 50
 # binomDistribution = matrix(c(do.call("cbind", binom)),  nrow = 1, ncol = 20, byrow = TRUE)
 # poisDistribution = matrix(c(do.call("cbind", pois)) , nrow = 1, ncol = 20, byrow = TRUE)
 myPartialMain <- pryr::partial(
@@ -951,8 +953,8 @@ myPartialMain <- pryr::partial(
     transitionsCount = transitionsCount,
     tasksCount = tasksCount,
     # distribution = c(1, 20, 30, 4, 15, 6),
-    distribution = poisD,
-    distributionName = "poisD",
+    distribution = binomD,
+    distributionName = "binomD",
     nodesPerfs = nodesPerfs,
     nodesGaps = nodesGaps
 )
@@ -960,7 +962,7 @@ myPartialMain <- pryr::partial(
 myPartialMain(balancingMethod = "roundRobin")
 # myPartialMain(balancingMethod = "weightRoundRobin")
 # myPartialMain(balancingMethod = "random")
-# myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
+myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
 
 # c(1, 20, 30, 4, 15, 6),
 

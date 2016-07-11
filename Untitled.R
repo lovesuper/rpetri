@@ -1,10 +1,11 @@
-# x <- 1:10
-# y <- rnorm(10)
-# par(mfrow = c(2,1))
-# plot(x, y, main = "approx(.) and approxfun(.)")
-# points(approx(x, y), col = 2, pch = "*")
+cat("\014") # Clear consosle output
+x <- 1:100
+y <- rnorm(100)
+plot(x, y, type = "n")
+par(mar = c(2,2,2,2), pin = c(5,2))
+points(approx(x, y), type = "l", col = 1, lwd = 2)
 # points(approx(x, y, method = "constant"), col = 4, pch = "*")
-#
+
 # f <- approxfun(x, y)
 # curve(f(x), 0, 11, col = "green2")
 # points(x, y)
@@ -23,26 +24,26 @@
 # stopifnot(ay == c(2,2,3,6,6,6,4,4,1,1,1))
 # approx(x, y, xout = x, ties = min)$y
 # approx(x, y, xout = x, ties = max)$y
-dat <- data.frame(x=1:10, y=(1:10)^2)
-a <- approx(dat$x, dat$y)
-af <- approxfun(dat$x, dat$y)
+# dat <- data.frame(x=1:10, y=(1:10)^2)
+# a <- approx(dat$x, dat$y)
+# af <- approxfun(dat$x, dat$y)
 #
 # plot(dat)
 # points(a, pch=2)
-plot(dat)
-curve(af, add=TRUE)
+# plot(dat)
+# curve(af, add=TRUE)
 
 
 # MAKING FIRST PLOT
 
-g_range <- range(0, lambdasList, 1)
-plot(
-    lambdasList,
-    type = "o",
-    col = "black",
-    ylim = g_range
-)
-smoothingSpline = smooth.spline(lambdasList, spar=0.35)
+# g_range <- range(0, lambdasList, 1)
+# plot(
+#     lambdasList,
+#     type = "o",
+#     col = "black",
+#     ylim = g_range
+# )
+# smoothingSpline = smooth.spline(lambdasList, spar=0.35)
 
 # Make x axis using Mon-Fri labels
 # axis(1,
@@ -51,10 +52,10 @@ smoothingSpline = smooth.spline(lambdasList, spar=0.35)
 
 # Make y axis with horizontal labels that display ticks at
 # every 4 marks. 4*0:g_range[2] is equivalent to c(0,4,8,12).
-axis(2, las = 1, at = 4 * 0:g_range[2])
+# axis(2, las = 1, at = 4 * 0:g_range[2])
 
 # Create box around plot
-box()
+# box()
 
 # Graph trucks with red dashed line and square points
 # lines(
@@ -93,3 +94,25 @@ box()
 # points(a, pch=2)
 # curve(af, add=TRUE)
 # plot(dat)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
