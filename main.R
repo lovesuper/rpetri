@@ -917,15 +917,26 @@ main <- function(inputFunc,
         # Idle time for working nodes
         idleTimeForWorkingNodes
 
-        x <- 1:length(tasksExcecutionTimeVector)
-        img <- paste("~/Downloads/", balancingMethod, ".jpeg", sep="")
-        png(file = img)
-        plot(x, tasksExcecutionTimeVector, type = "n")
-        par(mar = c(2,2,2,2), pin = c(5,2))
-        points(approx(x, tasksExcecutionTimeVector), type = "l", col = 1, lwd = 2)
-        dev.off()
-        # dev.print(png, img)
+        # x <- 1:length(tasksExcecutionTimeVector)
+        # img <- paste("~/Downloads/", balancingMethod, ".png", sep = "")
+        # png(file = img, width = 800, height = 600, res = 140)
+        # plot(x, tasksExcecutionTimeVector, type = "n")
+        # hist(tasksExcecutionTimeVector)
+        # par(mar = c(2,2,2,2), pin = c(5,2))
+        # points(approx(x, tasksExcecutionTimeVector), type = "l", col = 1, lwd = 2)
+        # abline(h = median(tasksExcecutionTimeVector), col="blue")
+        # abline(h = mean(tasksExcecutionTimeVector), col="red")
+        # dev.off()
     }
+    return(list(tasksExcecutionTimeVector,
+                detailedPerformanceLog,
+                performedTasksCount,
+                performanceLog,
+                processTime,
+                timeForCyclesVector,
+                rejectedTasks,
+                idleTimeForWorkingNodes
+    ))
 }
 
 cat("\014") # Clear consosle output
@@ -939,10 +950,11 @@ normD <- pnorm(1:20, mean = 72, sd = 15.2, lower.tail = FALSE)
 chiD <- rchisq(1:20, df = 7)
 FD <- rf(1:20, df1 = 5, df2 = 2)
 studD <- rt(1:20, df = Inf) # !
+
 nodesPerfs <- list(0.1, 0.5, 0.3)
-nodesGaps <- list(21, 22, 13)
-transitionsCount <- 10000
-tasksCount <- 50
+nodesGaps <- list(20, 20, 30)
+transitionsCount <- 1000000
+tasksCount <- 10000
 # binomDistribution = matrix(c(do.call("cbind", binom)),  nrow = 1, ncol = 20, byrow = TRUE)
 # poisDistribution = matrix(c(do.call("cbind", pois)) , nrow = 1, ncol = 20, byrow = TRUE)
 myPartialMain <- pryr::partial(
@@ -953,16 +965,29 @@ myPartialMain <- pryr::partial(
     transitionsCount = transitionsCount,
     tasksCount = tasksCount,
     # distribution = c(1, 20, 30, 4, 15, 6),
-    distribution = binomD,
-    distributionName = "binomD",
+    distribution = cuD,
+    distributionName = "cuD",
     nodesPerfs = nodesPerfs,
     nodesGaps = nodesGaps
 )
 
-myPartialMain(balancingMethod = "roundRobin")
-# myPartialMain(balancingMethod = "weightRoundRobin")
-# myPartialMain(balancingMethod = "random")
-myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
+resultsRR <- myPartialMain(balancingMethod = "roundRobin")
+resultsWRR <- myPartialMain(balancingMethod = "weightRoundRobin")
+resultsRand <- myPartialMain(balancingMethod = "random")
+resultsDW <- myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
+
+cat("\nDONE")
+# img <- "~/Downloads/rej-hist.png"
+# png(file = img, width = 800, height = 600, res = 140)
+rejTasksForRR <- resultsRR[[7]][[2]] + resultsRR[[7]][[3]] + resultsRR[[7]][[4]]
+rejTasksForWRR <- resultsWRR[[7]][[2]] + resultsWRR[[7]][[3]] + resultsWRR[[7]][[4]]
+rejTasksForRand <- resultsRand[[7]][[2]] + resultsRand[[7]][[3]] + resultsRand[[7]][[4]]
+rejTasksForDW <- resultsDW[[7]][[2]] + resultsDW[[7]][[3]] + resultsDW[[7]][[4]]
+hist(c(rejTasksForRR, rejTasksForWRR, rejTasksForRand, rejTasksForDW))
+# par(mar = c(2,2,2,2), pin = c(5,2))
+# points(approx(x, tasksExcecutionTimeVector), type = "l", col = 1, lwd = 2)
+# abline(h = median(tasksExcecutionTimeVector), col="blue")
+# dev.off()
 
 # c(1, 20, 30, 4, 15, 6),
 
