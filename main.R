@@ -887,13 +887,11 @@ main <- function(inputFunc,
         } else {
             thirdNodeEfficiency <- 0
         }
-
+        meanLoading = signif(median(c(median(firstNodeLoading), median(secondNodeLoading), median(thirdNodeLoading)) ), 3)
         cat("Result system whole time: ", processTime, "\n")
         wholeSystemEfficiency =  mean(c(firstNodeEfficiency, secondNodeEfficiency, thirdNodeEfficiency))
         cat("Efficiency of whole system: ", signif(wholeSystemEfficiency, 3), "\n")
-        cat("Mean loading of whole system: ", signif(median(
-            c(median(firstNodeLoading), median(secondNodeLoading), median(thirdNodeLoading))
-        ), 3), "\n")
+        cat("Mean loading of whole system: ", meanLoading, "\n")
         cat("Mean time of processing task in whole system:", mean(timeForCyclesVector), "\n")
         cat("Rejected tasks in whole system:", rejectedTasks[[1]] + rejectedTasks[[2]] + rejectedTasks[[3]], "\n")
         cat(replicate(20, "="),"\n")
@@ -931,7 +929,7 @@ main <- function(inputFunc,
     return(list(tasksExcecutionTimeVector,
                 detailedPerformanceLog,
                 performedTasksCount,
-                performanceLog,
+                meanLoading,
                 processTime,
                 timeForCyclesVector,
                 rejectedTasks,
@@ -939,7 +937,7 @@ main <- function(inputFunc,
     ))
 }
 
-cat("\014") # Clear consosle output
+# cat("\014") # Clear consosle output
 
 # INPUT DATA
 binomD <- rbinom(1:30, size = 40, prob = 1 / 6)
@@ -951,12 +949,13 @@ chiD <- rchisq(1:20, df = 7)
 FD <- rf(1:20, df1 = 5, df2 = 2)
 studD <- rt(1:20, df = Inf) # !
 
-nodesPerfs <- list(0.1, 0.5, 0.3)
-nodesGaps <- list(20, 20, 30)
+nodesPerfs <- list(0.3, 0.6, 0.9)
+nodesGaps <- list(20, 20, 40)
 transitionsCount <- 1000000
-tasksCount <- 10000
+tasksCount <- 4000
 # binomDistribution = matrix(c(do.call("cbind", binom)),  nrow = 1, ncol = 20, byrow = TRUE)
 # poisDistribution = matrix(c(do.call("cbind", pois)) , nrow = 1, ncol = 20, byrow = TRUE)
+# cuD <- runif(1:6, min = 1, max = 50)
 myPartialMain <- pryr::partial(
     main,
     inputFunc = APlus,
@@ -964,9 +963,9 @@ myPartialMain <- pryr::partial(
     M = startingMarks,
     transitionsCount = transitionsCount,
     tasksCount = tasksCount,
-    # distribution = c(1, 20, 30, 4, 15, 6),
-    distribution = cuD,
-    distributionName = "cuD",
+    # distribution = c(1, 2, 1, 10, 35, 60, 30, 12, 6, 12),
+    distribution = pexpD,
+    distributionName = "PoisD",
     nodesPerfs = nodesPerfs,
     nodesGaps = nodesGaps
 )
@@ -983,7 +982,9 @@ rejTasksForRR <- resultsRR[[7]][[2]] + resultsRR[[7]][[3]] + resultsRR[[7]][[4]]
 rejTasksForWRR <- resultsWRR[[7]][[2]] + resultsWRR[[7]][[3]] + resultsWRR[[7]][[4]]
 rejTasksForRand <- resultsRand[[7]][[2]] + resultsRand[[7]][[3]] + resultsRand[[7]][[4]]
 rejTasksForDW <- resultsDW[[7]][[2]] + resultsDW[[7]][[3]] + resultsDW[[7]][[4]]
-hist(c(rejTasksForRR, rejTasksForWRR, rejTasksForRand, rejTasksForDW))
+dat <- c(rejTasksForRR, rejTasksForWRR, rejTasksForRand, rejTasksForDW)
+dat <- c(resultsRR[[4]], resultsWRR[[4]], resultsRand[[4]], resultsDW[[4]])
+barplot(dat, names.arg = c("RR", "WRR", "Random", "DRR"))
 # par(mar = c(2,2,2,2), pin = c(5,2))
 # points(approx(x, tasksExcecutionTimeVector), type = "l", col = 1, lwd = 2)
 # abline(h = median(tasksExcecutionTimeVector), col="blue")

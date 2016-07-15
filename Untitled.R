@@ -1,9 +1,5 @@
 cat("\014") # Clear consosle output
-x <- 1:100
-y <- rnorm(100)
-plot(x, y, type = "n")
-par(mar = c(2,2,2,2), pin = c(5,2))
-points(approx(x, y), type = "l", col = 1, lwd = 2)
+
 # points(approx(x, y, method = "constant"), col = 4, pch = "*")
 
 # f <- approxfun(x, y)
@@ -95,6 +91,9 @@ points(approx(x, y), type = "l", col = 1, lwd = 2)
 # curve(af, add=TRUE)
 # plot(dat)
 
+# dat <- c(10,20,15,135)
+# hist(dat, breaks = "Sturges")
+# barplot(dat, names.arg=c("RR", "WRR", "Random", "DRR"))
 
 
 
@@ -105,14 +104,19 @@ points(approx(x, y), type = "l", col = 1, lwd = 2)
 
 
 
+binomD <- rbinom(1:10, size = 50, prob = 1 / 2)
+poisD <- rpois(1:30, 40)
+cuD <- runif(1:20, min = 1, max = 50)
+pexpD <- pexp(1:20, rate = 1 / 3)
+normD <- pnorm(1:20, mean = 72, sd = 15.2, lower.tail = FALSE)
+chiD <- rchisq(1:20, df = 7)
+FD <- rf(1:20, df1 = 5, df2 = 2)
+studD <- rt(1:20, df = Inf) # !
 
 
 
 
-
-
-
-
+print(pexpD)
 
 
 
