@@ -716,6 +716,7 @@ main <- function(inputFunc,
                  balancingMethod,
                  nodesPerfs,
                  nodesGaps) {
+    # print(distribution)
     commonFunc <- outputFunc - inputFunc
     performedTasksCount <- 0
     performanceLog <- matrix(c(0, 0, 0), nrow = 3, ncol = 1, byrow = TRUE)
@@ -914,17 +915,6 @@ main <- function(inputFunc,
         rejectedTasks
         # Idle time for working nodes
         idleTimeForWorkingNodes
-
-        # x <- 1:length(tasksExcecutionTimeVector)
-        # img <- paste("~/Downloads/", balancingMethod, ".png", sep = "")
-        # png(file = img, width = 800, height = 600, res = 140)
-        # plot(x, tasksExcecutionTimeVector, type = "n")
-        # hist(tasksExcecutionTimeVector)
-        # par(mar = c(2,2,2,2), pin = c(5,2))
-        # points(approx(x, tasksExcecutionTimeVector), type = "l", col = 1, lwd = 2)
-        # abline(h = median(tasksExcecutionTimeVector), col="blue")
-        # abline(h = mean(tasksExcecutionTimeVector), col="red")
-        # dev.off()
     }
     return(list(tasksExcecutionTimeVector,
                 detailedPerformanceLog,
@@ -933,7 +923,8 @@ main <- function(inputFunc,
                 processTime,
                 timeForCyclesVector,
                 rejectedTasks,
-                idleTimeForWorkingNodes
+                idleTimeForWorkingNodes,
+                performanceLog
     ))
 }
 
@@ -949,13 +940,21 @@ chiD <- rchisq(1:20, df = 7)
 FD <- rf(1:20, df1 = 5, df2 = 2)
 studD <- rt(1:20, df = Inf) # !
 
-nodesPerfs <- list(0.3, 0.6, 0.9)
-nodesGaps <- list(20, 20, 40)
 transitionsCount <- 1000000
-tasksCount <- 4000
-# binomDistribution = matrix(c(do.call("cbind", binom)),  nrow = 1, ncol = 20, byrow = TRUE)
-# poisDistribution = matrix(c(do.call("cbind", pois)) , nrow = 1, ncol = 20, byrow = TRUE)
-# cuD <- runif(1:6, min = 1, max = 50)
+nodesPerfs <- list(0.6, 0.3, 0.1)
+nodesGaps <- list(10, 100, 100)
+tasksCount <- 100
+
+perfDistribution = c(
+    14.617036, 23.499859, 15.674704, 10.719347, 7.892669, 8.942420, 40.888192,
+    16.332921, 29.963656, 4.489176, 34.746372, 3.615892, 36.894031, 5.643181,
+    3.785384, 43.331681, 29.505039, 7.454642, 27.730628, 41.550876, 10.137719,
+    39.745254, 8.330701, 3.091769, 20.920556, 3.083225, 18.615411, 6.135353,
+    35.041964, 18.802846, 39.236330, 3.182860, 19.411467, 44.857298, 23.516752,
+    25.296108, 26.312003, 17.086546, 33.567694, 19.348448, 25.935871, 24.427297,
+    45.007425, 3.539543, 4.235011, 2.501467, 19.954152, 31.347208, 6.746856, 9.348601
+)
+
 myPartialMain <- pryr::partial(
     main,
     inputFunc = APlus,
@@ -963,9 +962,9 @@ myPartialMain <- pryr::partial(
     M = startingMarks,
     transitionsCount = transitionsCount,
     tasksCount = tasksCount,
-    # distribution = c(1, 2, 1, 10, 35, 60, 30, 12, 6, 12),
-    distribution = pexpD,
-    distributionName = "PoisD",
+    # distribution = perfDistribution,
+    distribution = cuD,
+    distributionName = "cuD",
     nodesPerfs = nodesPerfs,
     nodesGaps = nodesGaps
 )
@@ -976,20 +975,121 @@ resultsRand <- myPartialMain(balancingMethod = "random")
 resultsDW <- myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
 
 cat("\nDONE")
-# img <- "~/Downloads/rej-hist.png"
-# png(file = img, width = 800, height = 600, res = 140)
 rejTasksForRR <- resultsRR[[7]][[2]] + resultsRR[[7]][[3]] + resultsRR[[7]][[4]]
 rejTasksForWRR <- resultsWRR[[7]][[2]] + resultsWRR[[7]][[3]] + resultsWRR[[7]][[4]]
 rejTasksForRand <- resultsRand[[7]][[2]] + resultsRand[[7]][[3]] + resultsRand[[7]][[4]]
 rejTasksForDW <- resultsDW[[7]][[2]] + resultsDW[[7]][[3]] + resultsDW[[7]][[4]]
-dat <- c(rejTasksForRR, rejTasksForWRR, rejTasksForRand, rejTasksForDW)
-dat <- c(resultsRR[[4]], resultsWRR[[4]], resultsRand[[4]], resultsDW[[4]])
-barplot(dat, names.arg = c("RR", "WRR", "Random", "DRR"))
-# par(mar = c(2,2,2,2), pin = c(5,2))
-# points(approx(x, tasksExcecutionTimeVector), type = "l", col = 1, lwd = 2)
-# abline(h = median(tasksExcecutionTimeVector), col="blue")
-# dev.off()
 
-# c(1, 20, 30, 4, 15, 6),
+if (FALSE) {
+    # Rejected tasks
+    dat <- c(rejTasksForRR, rejTasksForWRR, rejTasksForRand, rejTasksForDW)
+    barplot(
+        height = dat,
+        width = 3,
+        space = 0.2,
+        names.arg = c(
+            "Циклический",
+            "Весовой",
+            "Случайный",
+            "Динамич.\nвесов"
+        ),
+        cex.names = 0.9,
+        main = "Отброшенные заявки",
+        density = c(1),
+        sub = "(Используется непрерывное равномерное распределение)",
+        xlab = "Используемые алгоритмы",
+        ylim = c(0.0, 60.0),
+        ylab = "Количество отброшенных заявок"
+    )
+}
+
+if (FALSE) {
+    # Mean system loading
+    dat <- c(resultsRR[[4]], resultsWRR[[4]], resultsRand[[4]], resultsDW[[4]])
+    img <- paste("~/Downloads/", "summary-mean-loading", ".png", sep = "")
+    # png( file = img, width = 800, height = 600, res = 140 )
+    barplot(
+        height = dat,
+        width = 3,
+        space = 0.2,
+        names.arg = c("Циклический", "Весовой", "Случайный", "Динамич.\nвесов"),
+        cex.names = 0.9,
+        main = "Средняя загруженность системы",
+        density = c(1),
+        sub = "(Используется непрерывное равномерное распределение)",
+        xlab = "Используемые алгоритмы",
+        # ylim = c(0.0, 6.0),
+        ylab = "Средняя загруженность системы"
+    )
+    # dev.off()
+}
+
+if (FALSE) {
+    # Task excecution times plot (combiled)
+    tasksExcecutionTimeVectorRR <- list(resultsRR[[1]], "Циклический алгоритм")
+    tasksExcecutionTimeVectorWRR <- list(resultsWRR[[1]], "Весовой циклический алгоритм")
+    tasksExcecutionTimeVectorRandom <- list(resultsRand[[1]], "Случайный алгоритм")
+    tasksExcecutionTimeVectorDRR <- list(resultsDW[[1]], "Алгоритм динамических весов")
+
+    for (algoritmData in list(tasksExcecutionTimeVectorRR,
+                       tasksExcecutionTimeVectorWRR,
+                       tasksExcecutionTimeVectorRandom,
+                       tasksExcecutionTimeVectorDRR
+                       )) {
+        algorithm = algoritmData[[1]]
+        algorithmName = algoritmData[[2]]
+        img <- paste("~/Downloads/", algorithmName, ".png", sep = "")
+        png( file = img, width = 800, height = 600, res = 140 )
+        plot(
+            1:length(algorithm),
+            algorithm,
+            type = "n",
+            main = "Тенденция времени выполнения заявок в системе",
+            sub = paste("(", algorithmName, ")"),
+            xlab = "Время системы",
+            ylab = "Время выполнения"
+        )
+        par(mar = c(2, 2, 2, 2), pin = c(5, 2))
+        points(
+            approx(1:length(algorithm), algorithm),
+            type = "l",
+            col = 1,
+            lwd = 2
+        )
+        abline(h = median(algorithm), col = "blue")
+        # abline(h = max(algorithm), col = "green")
+        abline(h = mean(algorithm), col = "red")
+        dev.off()
+    }
+}
+
+if (TRUE) {
+    # Tasks and node loading
+    logRR <- list(resultsRR[[9]], "Циклический алгоритм")
+    logWRR <- list(resultsWRR[[9]], "Весовой алгоритм")
+    logRand <- list(resultsRand[[9]], "Случайный алгоритм")
+    logDW <- list(resultsDW[[9]], "Динамический весовой алгоритм")
+
+    methods <- list(logRR, logWRR, logRand, logDW)
+
+    for (algoritmData in methods) {
+        img <- paste("~/Downloads/", "tasks-and-loading", ".png", sep = "")
+        # png( file = img, width = 800, height = 600, res = 140 )
+        barplot(
+            height = dat,
+            width = 3,
+            space = 0.2,
+            names.arg = c("Циклический", "Весовой", "Случайный", "Динамич.\nвесов"),
+            cex.names = 0.9,
+            main = "Средняя загруженность системы",
+            density = c(1),
+            sub = "(Используется непрерывное равномерное распределение)",
+            xlab = "Используемые алгоритмы",
+            # ylim = c(0.0, 6.0),
+            ylab = "Средняя загруженность системы"
+        )
+        # dev.off()
+    }
+}
 
 # Сделать эксперимент с меняющимися настройками сервера во времени

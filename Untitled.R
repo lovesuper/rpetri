@@ -103,20 +103,25 @@ cat("\014") # Clear consosle output
 
 
 
+#
+# binomD <- rbinom(1:10, size = 50, prob = 1 / 2)
+# poisD <- rpois(1:30, 40)
+# cuD <- runif(1:20, min = 1, max = 50)
+# pexpD <- pexp(1:20, rate = 1 / 3)
+# normD <- pnorm(1:30, mean = 5, sd = 5.2, lower.tail = FALSE)
+# chiD <- rchisq(1:20, df = 7)
+# FD <- rf(1:20, df1 = 5, df2 = 2)
+# studD <- rt(1:20, df = Inf) # !
+#
+#
+#
+#
+# print(normD)
 
-binomD <- rbinom(1:10, size = 50, prob = 1 / 2)
-poisD <- rpois(1:30, 40)
-cuD <- runif(1:20, min = 1, max = 50)
-pexpD <- pexp(1:20, rate = 1 / 3)
-normD <- pnorm(1:20, mean = 72, sd = 15.2, lower.tail = FALSE)
-chiD <- rchisq(1:20, df = 7)
-FD <- rf(1:20, df1 = 5, df2 = 2)
-studD <- rt(1:20, df = Inf) # !
+require(EMD)
+# y <- c(0, 1, 2, 1, -1, 1:4, 5, 6, 0, -4, -6, -5:5, -2:2)
+# y <- c(0, 0, 0, 1, -1, 1:4, 4, 4, 0, 0, 0, -5:5, -2:2, 2, 2)
+y <- c(0, 0, 0, 1, -1, 1:4, 4, 4, 0, 0, 0, -5:5, -2:2, 0, 0)
 
-
-
-
-print(pexpD)
-
-
-
+plot(y, type = "b"); abline(h = 0)
+extrema(y)
