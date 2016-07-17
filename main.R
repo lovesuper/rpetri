@@ -946,9 +946,9 @@ nodesPerfs <- list(0.6, 0.3, 0.1)
 nodesGaps <- list(10, 100, 100)
 tasksCount <- 100
 # distributionName <- "непрерывное равномерное распределение"
-distributionName <- "нормальное распределение"
+# distributionName <- "нормальное распределение"
 # distributionName <- "экспоненциальное распределение"
-# distributionName <- "распределение Пуассона"
+distributionName <- "распределение Пуассона"
 
 perfDistribution <- c(
     14.617036, 23.499859, 15.674704, 10.719347, 7.892669, 8.942420, 40.888192,
@@ -968,7 +968,7 @@ myPartialMain <- pryr::partial(
     transitionsCount = transitionsCount,
     tasksCount = tasksCount,
     # distribution = perfDistribution,
-    distribution = normD,
+    distribution = poisD,
     distributionName = distributionName,
     nodesPerfs = nodesPerfs,
     nodesGaps = nodesGaps
@@ -980,7 +980,8 @@ resultsRand <- myPartialMain(balancingMethod = "random")
 resultsDW <- myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
 
 cat("\nDONE")
-if (TRUE) {
+
+if (FALSE) {
     # Rejected tasks
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] rejectedTasks/"
@@ -1025,7 +1026,7 @@ if (TRUE) {
     dev.off()
 }
 
-if (TRUE) {
+if (FALSE) {
     # Mean system loading
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] meanSysLoading/"
@@ -1061,7 +1062,7 @@ if (TRUE) {
     dev.off()
 }
 
-if (TRUE) {
+if (FALSE) {
     # Task excecution times plot (combiled)
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] taskExcecutionTime/"
@@ -1115,7 +1116,7 @@ if (TRUE) {
     }
 }
 
-if (TRUE) {
+if (FALSE) {
     # Tasks and node loading
     detailedNodesLogRR <- list(resultsRR[[9]], "Циклический алгоритм")
     detailedNodesLogWRR <- list(resultsWRR[[9]], "Весовой алгоритм")
@@ -1181,7 +1182,7 @@ if (TRUE) {
     }
 }
 
-if (TRUE) {
+if (FALSE) {
     # Whole time system working
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] wholeSystemTime/"
@@ -1218,7 +1219,7 @@ if (TRUE) {
     dev.off()
 }
 
-if (TRUE) {
+if (FALSE) {
     # Times of tasks being in system
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] taskBeingInThaSystem/"
@@ -1272,7 +1273,7 @@ if (TRUE) {
     }
 }
 
-if (TRUE) {
+if (FALSE) {
     # Efficency of system
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] efficency/"
@@ -1311,7 +1312,7 @@ if (TRUE) {
     dev.off()
 }
 
-if (TRUE) {
+if (FALSE) {
     # Mean time for performing task in system
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] meanTaskTimeInSystem/"
@@ -1356,4 +1357,3 @@ if (TRUE) {
     dev.off()
 }
 # Сделать эксперимент с меняющимися настройками сервера во времени
-
