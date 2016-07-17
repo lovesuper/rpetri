@@ -945,8 +945,12 @@ transitionsCount <- 1000000
 nodesPerfs <- list(0.6, 0.3, 0.1)
 nodesGaps <- list(10, 100, 100)
 tasksCount <- 100
+# distributionName <- "непрерывное равномерное распределение"
+distributionName <- "нормальное распределение"
+# distributionName <- "экспоненциальное распределение"
+# distributionName <- "распределение Пуассона"
 
-perfDistribution = c(
+perfDistribution <- c(
     14.617036, 23.499859, 15.674704, 10.719347, 7.892669, 8.942420, 40.888192,
     16.332921, 29.963656, 4.489176, 34.746372, 3.615892, 36.894031, 5.643181,
     3.785384, 43.331681, 29.505039, 7.454642, 27.730628, 41.550876, 10.137719,
@@ -964,8 +968,8 @@ myPartialMain <- pryr::partial(
     transitionsCount = transitionsCount,
     tasksCount = tasksCount,
     # distribution = perfDistribution,
-    distribution = cuD,
-    distributionName = "cuD",
+    distribution = normD,
+    distributionName = distributionName,
     nodesPerfs = nodesPerfs,
     nodesGaps = nodesGaps
 )
@@ -976,7 +980,7 @@ resultsRand <- myPartialMain(balancingMethod = "random")
 resultsDW <- myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
 
 cat("\nDONE")
-if (FALSE) {
+if (TRUE) {
     # Rejected tasks
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] rejectedTasks/"
@@ -1012,7 +1016,7 @@ if (FALSE) {
         cex.names = 0.9,
         main = "Отброшенные заявки",
         density = c(1),
-        sub = "(Используется непрерывное равномерное распределение)",
+        sub = paste("Используется ", distributionName, sep = ""),
         xlab = "Используемые алгоритмы",
         # ylim = c(0.0, 6.0),
         ylab = "Количество отброшенных заявок"
@@ -1021,7 +1025,7 @@ if (FALSE) {
     dev.off()
 }
 
-if (FALSE) {
+if (TRUE) {
     # Mean system loading
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] meanSysLoading/"
@@ -1048,7 +1052,7 @@ if (FALSE) {
         cex.names = 0.9,
         main = "Средняя загруженность системы",
         density = c(1),
-        sub = "(Используется непрерывное равномерное распределение)",
+        sub = paste("Используется ", distributionName, sep = ""),
         xlab = "Используемые алгоритмы",
         # ylim = c(0.0, 6.0),
         ylab = "Средняя загруженность системы"
@@ -1057,7 +1061,7 @@ if (FALSE) {
     dev.off()
 }
 
-if (FALSE) {
+if (TRUE) {
     # Task excecution times plot (combiled)
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] taskExcecutionTime/"
@@ -1091,8 +1095,8 @@ if (FALSE) {
             1:length(algorithm),
             algorithm,
             type = "n",
-            main = "Тенденция времени выполнения заявок в системе",
-            sub = paste("(", algorithmName, ")", sep = ""),
+            main = paste("Тенденция времени выполнения заявок\n в узле-исполнителе (", algorithmName, ")", sep = ""),
+            sub = paste("Используется ", distributionName, sep = ""),
             xlab = "Время системы",
             ylab = "Время выполнения"
         )
@@ -1111,7 +1115,7 @@ if (FALSE) {
     }
 }
 
-if (FALSE) {
+if (TRUE) {
     # Tasks and node loading
     detailedNodesLogRR <- list(resultsRR[[9]], "Циклический алгоритм")
     detailedNodesLogWRR <- list(resultsWRR[[9]], "Весовой алгоритм")
@@ -1159,9 +1163,9 @@ if (FALSE) {
         barplot(
             height = t(nodesInfo),
             main = "Заявки и нагрузка на узлы кластера",
-            xlab = "Узлы РВС (используется непрерывное равномерное распределение)",
+            xlab = paste("Узлы РВС (", methodName, ")", sep = ""),
             col = c("lightgray", "darkgray"),
-            sub = methodName,
+            sub = paste("Используется ", distributionName, sep = ""),
             beside = TRUE
         )
         legend(
@@ -1177,7 +1181,7 @@ if (FALSE) {
     }
 }
 
-if (FALSE) {
+if (TRUE) {
     # Whole time system working
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] wholeSystemTime/"
@@ -1194,7 +1198,7 @@ if (FALSE) {
     }
 
     resultData <- c(resultsRR[[5]], resultsWRR[[5]], resultsRand[[5]], resultsDW[[5]])
-    img <- paste(resultsDirPath, "whole-time-woking", ".png", sep = "")
+    img <- paste(resultsDirPath, "whole-time-working", ".png", sep = "")
     png(file = img, width = 800, height = 600, res = 140)
     barplot(
         height = resultData,
@@ -1204,7 +1208,7 @@ if (FALSE) {
         cex.names = 0.9,
         main = "Время работы системы",
         density = c(1),
-        sub = "(Используется непрерывное равномерное распределение)",
+        sub = paste("Используется ", distributionName, sep = ""),
         xlab = "Используемые алгоритмы",
         # ylim = c(0.0, 6.0),
         ylab = "Время работы системы"
@@ -1214,7 +1218,7 @@ if (FALSE) {
     dev.off()
 }
 
-if (FALSE) {
+if (TRUE) {
     # Times of tasks being in system
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] taskBeingInThaSystem/"
@@ -1248,8 +1252,8 @@ if (FALSE) {
             1:length(algorithm),
             algorithm,
             type = "n",
-            main = "Тенденция времени нахождения заявки в системе",
-            sub = paste("(", algorithmName, ")", sep = ""),
+            main = paste("Тенденция времени нахождения заявки в системе\n (", algorithmName, ")", sep = ""),
+            sub = paste("Используется ", distributionName, sep = ""),
             xlab = "Поступление заявок (время системы)",
             ylab = "Время нахождения заявки в системе"
         )
@@ -1288,7 +1292,6 @@ if (TRUE) {
         )
     }
     # signif(wholeSystemEfficiency, 3)
-    dat <- c(resultsRR[[4]], resultsWRR[[4]], resultsRand[[4]], resultsDW[[4]])
     img <- paste(resultsDirPath, "summary-efficency", ".png", sep = "")
     png( file = img, width = 800, height = 600, res = 140 )
     barplot(
@@ -1299,10 +1302,55 @@ if (TRUE) {
         cex.names = 0.9,
         main = "Эффективность системы",
         density = c(1),
-        sub = "(Используется непрерывное равномерное распределение)",
+        sub = paste("Используется ", distributionName, sep = ""),
         xlab = "Используемые алгоритмы",
         # ylim = c(0.0, 6.0),
         ylab = "Эффективность системы"
+    )
+    box(bty = "l")
+    dev.off()
+}
+
+if (TRUE) {
+    # Mean time for performing task in system
+    resultsPath <- "~/Downloads"
+    resultsDir <- "[results] meanTaskTimeInSystem/"
+    taskInSystemTimeVectorRR <- resultsRR[[6]]
+    taskInSystemTimeVectorWRR <- resultsWRR[[6]]
+    taskInSystemTimeVectorRandom <- resultsRand[[6]]
+    taskInSystemTimeVectorDRR <- resultsDW[[6]]
+
+    resultsDirPath <- paste(resultsPath, resultsDir, sep = "/")
+    meanTaskTimes <- c(
+        median(taskInSystemTimeVectorRR),
+        median(taskInSystemTimeVectorWRR),
+        median(taskInSystemTimeVectorRandom),
+        median(taskInSystemTimeVectorDRR)
+    )
+
+    if (!file.exists(resultsDirPath)) {
+        dir.create(
+            path = resultsDirPath,
+            showWarnings = TRUE,
+            recursive = FALSE,
+            mode = "0777"
+        )
+    }
+
+    img <- paste(resultsDirPath, "mean-task-performing-in-system", ".png", sep = "")
+    png( file = img, width = 800, height = 600, res = 140 )
+    barplot(
+        height = meanTaskTimes,
+        width = 3,
+        space = 0.2,
+        names.arg = c("Циклический", "Весовой", "Случайный", "Динамич.\nвесов"),
+        cex.names = 0.9,
+        main = "Среднее время нахождения заявки в системе",
+        density = c(1),
+        sub = paste("Используется ", distributionName, sep = ""),
+        xlab = "Используемые алгоритмы",
+        # ylim = c(0.0, 6.0),
+        ylab = "Среднее время нахождения заявки в системе"
     )
     box(bty = "l")
     dev.off()
