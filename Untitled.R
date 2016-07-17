@@ -118,10 +118,32 @@ cat("\014") # Clear consosle output
 #
 # print(normD)
 
-require(EMD)
-# y <- c(0, 1, 2, 1, -1, 1:4, 5, 6, 0, -4, -6, -5:5, -2:2)
-# y <- c(0, 0, 0, 1, -1, 1:4, 4, 4, 0, 0, 0, -5:5, -2:2, 2, 2)
-y <- c(0, 0, 0, 1, -1, 1:4, 4, 4, 0, 0, 0, -5:5, -2:2, 0, 0)
+Reasonstats <- read.table(text = "
+                          Category      Reason   Species
+                          Decline       Genuine      24
+                          Improved       Genuine      16
+                          Improved Misclassified      85
+                          Decline Misclassified      41
+                          Decline     Taxonomic       2
+                          Improved     Taxonomic       7
+                          Decline       Unclear      41
+                          Improved       Unclear     117",
+                          header = T)
 
-plot(y, type = "b"); abline(h = 0)
-extrema(y)
+ReasonstatsDec <- Reasonstats[which(Reasonstats$Category == "Decline"), ]
+ReasonstatsImp <- Reasonstats[which(Reasonstats$Category == "Improved"), ]
+Reasonstats3 <- cbind(ReasonstatsImp[, 3], ReasonstatsDec[, 3])
+colnames(Reasonstats3) <- c("Improved", "Decline")
+rownames(Reasonstats3) <- c("G", "M", "T", "U")
+
+barplot(
+    t(Reasonstats3),
+    beside = T,
+    ylab = "number of species",
+    cex.names = 0.8,
+    las = 2,
+    ylim = c(0, 120),
+    col = c("darkblue", "red")
+)
+
+box(bty = "l")

@@ -1001,6 +1001,7 @@ if (FALSE) {
         ylim = c(0.0, 60.0),
         ylab = "Количество отброшенных заявок"
     )
+    box(bty = "l")
 }
 
 if (FALSE) {
@@ -1059,37 +1060,45 @@ if (FALSE) {
         abline(h = median(algorithm), col = "blue")
         # abline(h = max(algorithm), col = "green")
         abline(h = mean(algorithm), col = "red")
+        box(bty = "l")
         dev.off()
     }
 }
 
 if (TRUE) {
     # Tasks and node loading
-    logRR <- list(resultsRR[[9]], "Циклический алгоритм")
-    logWRR <- list(resultsWRR[[9]], "Весовой алгоритм")
-    logRand <- list(resultsRand[[9]], "Случайный алгоритм")
-    logDW <- list(resultsDW[[9]], "Динамический весовой алгоритм")
-
+    logRR <- list(resultsRR[[9]], "Циклический")
+    logWRR <- list(resultsWRR[[9]], "Весовой")
+    logRand <- list(resultsRand[[9]], "Случайный")
+    logDW <- list(resultsDW[[9]], "Динамический весовой")
     methods <- list(logRR, logWRR, logRand, logDW)
-
     for (algoritmData in methods) {
-        img <- paste("~/Downloads/", "tasks-and-loading", ".png", sep = "")
+        img <- paste("~/Downloads/", "tasks-and-loading", algoritmData[[2]], ".png", sep = "")
         # png( file = img, width = 800, height = 600, res = 140 )
+        tasksCount <- algoritmData[[1]][2,]
+        nodeLoading <- algoritmData[[1]][3,]
+        NodesInfo <- cbind(nodeLoading, tasksCount)
+        colnames(NodesInfo) <- c("Processed tasks", "Mean loading")
+        rownames(NodesInfo) <- c("1st node", "2st node", "3rd node")
         barplot(
-            height = dat,
-            width = 3,
-            space = 0.2,
-            names.arg = c("Циклический", "Весовой", "Случайный", "Динамич.\nвесов"),
-            cex.names = 0.9,
-            main = "Средняя загруженность системы",
-            density = c(1),
-            sub = "(Используется непрерывное равномерное распределение)",
-            xlab = "Используемые алгоритмы",
-            # ylim = c(0.0, 6.0),
-            ylab = "Средняя загруженность системы"
+            height = t(NodesInfo),
+            main = "Заявки и нагрузка на узлы кластера",
+            xlab = "Узлы РВС (Используется непрерывное равномерное распределение)",
+            col = c("white", "gray"),
+            beside = TRUE
         )
+        legend(
+            x = "bottomleft",
+            legend = c("Количество заявок", "Нагрузка"),
+            bty = "o",
+            text.width = 3,
+            col = c("white", "gray"),
+            lwd = 10
+        )
+        box(bty = "l")
         # dev.off()
     }
+
 }
 
 # Сделать эксперимент с меняющимися настройками сервера во времени
