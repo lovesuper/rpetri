@@ -890,8 +890,8 @@ main <- function(inputFunc,
         }
         meanLoading = signif(median(c(median(firstNodeLoading), median(secondNodeLoading), median(thirdNodeLoading)) ), 3)
         # cat("Result system whole time: ", processTime, "\n")
-        # wholeSystemEfficiency =  mean(c(firstNodeEfficiency, secondNodeEfficiency, thirdNodeEfficiency))
-        # cat("Efficiency of whole system: ", signif(wholeSystemEfficiency, 3), "\n")
+        wholeSystemEfficiency =  mean(c(firstNodeEfficiency, secondNodeEfficiency, thirdNodeEfficiency))
+        cat("Efficiency of whole system: ", signif(wholeSystemEfficiency, 3), "\n")
         # cat("Mean loading of whole system: ", meanLoading, "\n")
         # cat("Mean time of processing task in whole system:", mean(timeForCyclesVector), "\n")
         # cat("Rejected tasks in whole system:", rejectedTasks[[1]] + rejectedTasks[[2]] + rejectedTasks[[3]], "\n")
@@ -924,7 +924,8 @@ main <- function(inputFunc,
                 timeForCyclesVector,
                 rejectedTasks,
                 idleTimeForWorkingNodes,
-                performanceLog
+                performanceLog,
+                wholeSystemEfficiency
     ))
 }
 
@@ -975,13 +976,28 @@ resultsRand <- myPartialMain(balancingMethod = "random")
 resultsDW <- myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
 
 cat("\nDONE")
-rejTasksForRR <- resultsRR[[7]][[2]] + resultsRR[[7]][[3]] + resultsRR[[7]][[4]]
-rejTasksForWRR <- resultsWRR[[7]][[2]] + resultsWRR[[7]][[3]] + resultsWRR[[7]][[4]]
-rejTasksForRand <- resultsRand[[7]][[2]] + resultsRand[[7]][[3]] + resultsRand[[7]][[4]]
-rejTasksForDW <- resultsDW[[7]][[2]] + resultsDW[[7]][[3]] + resultsDW[[7]][[4]]
-
 if (FALSE) {
     # Rejected tasks
+    resultsPath <- "~/Downloads"
+    resultsDir <- "[results] rejectedTasks/"
+
+    rejTasksForRR <- resultsRR[[7]][[2]] + resultsRR[[7]][[3]] + resultsRR[[7]][[4]]
+    rejTasksForWRR <- resultsWRR[[7]][[2]] + resultsWRR[[7]][[3]] + resultsWRR[[7]][[4]]
+    rejTasksForRand <- resultsRand[[7]][[2]] + resultsRand[[7]][[3]] + resultsRand[[7]][[4]]
+    rejTasksForDW <- resultsDW[[7]][[2]] + resultsDW[[7]][[3]] + resultsDW[[7]][[4]]
+
+    resultsDirPath <- paste(resultsPath, resultsDir, sep = "/")
+
+    if (!file.exists(resultsDirPath)) {
+        dir.create(
+            path = resultsDirPath,
+            showWarnings = TRUE,
+            recursive = FALSE,
+            mode = "0777"
+        )
+    }
+    img <- paste(resultsDirPath, "rejected-tasks", ".png", sep = "")
+    png(file = img, width = 800, height = 600, res = 140)
     dat <- c(rejTasksForRR, rejTasksForWRR, rejTasksForRand, rejTasksForDW)
     barplot(
         height = dat,
@@ -998,17 +1014,32 @@ if (FALSE) {
         density = c(1),
         sub = "(Используется непрерывное равномерное распределение)",
         xlab = "Используемые алгоритмы",
-        ylim = c(0.0, 60.0),
+        # ylim = c(0.0, 6.0),
         ylab = "Количество отброшенных заявок"
     )
     box(bty = "l")
+    dev.off()
 }
 
 if (FALSE) {
     # Mean system loading
+    resultsPath <- "~/Downloads"
+    resultsDir <- "[results] meanSysLoading/"
+
+    resultsDirPath <- paste(resultsPath, resultsDir, sep = "/")
+
+    if (!file.exists(resultsDirPath)) {
+        dir.create(
+            path = resultsDirPath,
+            showWarnings = TRUE,
+            recursive = FALSE,
+            mode = "0777"
+        )
+    }
+
     dat <- c(resultsRR[[4]], resultsWRR[[4]], resultsRand[[4]], resultsDW[[4]])
-    img <- paste("~/Downloads/", "summary-mean-loading", ".png", sep = "")
-    # png( file = img, width = 800, height = 600, res = 140 )
+    img <- paste(resultsDirPath, "summary-mean-loading", ".png", sep = "")
+    png( file = img, width = 800, height = 600, res = 140 )
     barplot(
         height = dat,
         width = 3,
@@ -1022,11 +1053,26 @@ if (FALSE) {
         # ylim = c(0.0, 6.0),
         ylab = "Средняя загруженность системы"
     )
-    # dev.off()
+    box(bty = "l")
+    dev.off()
 }
 
 if (FALSE) {
     # Task excecution times plot (combiled)
+    resultsPath <- "~/Downloads"
+    resultsDir <- "[results] taskExcecutionTime/"
+
+    resultsDirPath <- paste(resultsPath, resultsDir, sep = "/")
+
+    if (!file.exists(resultsDirPath)) {
+        dir.create(
+            path = resultsDirPath,
+            showWarnings = TRUE,
+            recursive = FALSE,
+            mode = "0777"
+        )
+    }
+
     tasksExcecutionTimeVectorRR <- list(resultsRR[[1]], "Циклический алгоритм")
     tasksExcecutionTimeVectorWRR <- list(resultsWRR[[1]], "Весовой циклический алгоритм")
     tasksExcecutionTimeVectorRandom <- list(resultsRand[[1]], "Случайный алгоритм")
@@ -1039,14 +1085,14 @@ if (FALSE) {
                        )) {
         algorithm = algoritmData[[1]]
         algorithmName = algoritmData[[2]]
-        img <- paste("~/Downloads/", algorithmName, ".png", sep = "")
+        img <- paste(resultsDirPath, algorithmName, ".png", sep = "")
         png( file = img, width = 800, height = 600, res = 140 )
         plot(
             1:length(algorithm),
             algorithm,
             type = "n",
             main = "Тенденция времени выполнения заявок в системе",
-            sub = paste("(", algorithmName, ")"),
+            sub = paste("(", algorithmName, ")", sep = ""),
             xlab = "Время системы",
             ylab = "Время выполнения"
         )
@@ -1065,7 +1111,7 @@ if (FALSE) {
     }
 }
 
-if (TRUE) {
+if (FALSE) {
     # Tasks and node loading
     detailedNodesLogRR <- list(resultsRR[[9]], "Циклический алгоритм")
     detailedNodesLogWRR <- list(resultsWRR[[9]], "Весовой алгоритм")
@@ -1078,7 +1124,7 @@ if (TRUE) {
              detailedNodesLogDW)
 
     resultsPath <- "~/Downloads"
-    resultsDir <- "tasks&Loadings"
+    resultsDir <- "[results] tasks&Loadings/"
 
     resultsDirPath <- paste(resultsPath, resultsDir, sep = "/")
 
@@ -1093,8 +1139,7 @@ if (TRUE) {
 
     for (oneAlgorithmData in logsToIterate) {
         img <- paste(
-            "~/Downloads/",
-            resultsDir,
+            resultsDirPath,
             oneAlgorithmData[[2]],
             ".png",
             sep = ""
@@ -1107,7 +1152,7 @@ if (TRUE) {
         nodeLoading <- methodData[3,]
         nodesInfo <- cbind(nodeLoading, tasksCount)
 
-        # png( file = img, width = 800, height = 600, res = 140 )
+        png(file = img, width = 800, height = 600, res = 140)
 
         colnames(nodesInfo) <- c("Processed tasks", "Mean loading")
         rownames(nodesInfo) <- c("Узел №1", "Узел №2", "Узел №3")
@@ -1128,9 +1173,139 @@ if (TRUE) {
             lwd = 10
         )
         box(bty = "l")
-        # dev.off()
+        dev.off()
     }
-
 }
 
+if (FALSE) {
+    # Whole time system working
+    resultsPath <- "~/Downloads"
+    resultsDir <- "[results] wholeSystemTime/"
+
+    resultsDirPath <- paste(resultsPath, resultsDir, sep = "/")
+
+    if (!file.exists(resultsDirPath)) {
+        dir.create(
+            path = resultsDirPath,
+            showWarnings = TRUE,
+            recursive = FALSE,
+            mode = "0777"
+        )
+    }
+
+    resultData <- c(resultsRR[[5]], resultsWRR[[5]], resultsRand[[5]], resultsDW[[5]])
+    img <- paste(resultsDirPath, "whole-time-woking", ".png", sep = "")
+    png(file = img, width = 800, height = 600, res = 140)
+    barplot(
+        height = resultData,
+        width = 3,
+        space = 0.2,
+        names.arg = c("Циклический", "Весовой", "Случайный", "Динамич.\nвесов"),
+        cex.names = 0.9,
+        main = "Время работы системы",
+        density = c(1),
+        sub = "(Используется непрерывное равномерное распределение)",
+        xlab = "Используемые алгоритмы",
+        # ylim = c(0.0, 6.0),
+        ylab = "Время работы системы"
+    )
+    box(bty = "l")
+
+    dev.off()
+}
+
+if (FALSE) {
+    # Times of tasks being in system
+    resultsPath <- "~/Downloads"
+    resultsDir <- "[results] taskBeingInThaSystem/"
+
+    resultsDirPath <- paste(resultsPath, resultsDir, sep = "/")
+
+    if (!file.exists(resultsDirPath)) {
+        dir.create(
+            path = resultsDirPath,
+            showWarnings = TRUE,
+            recursive = FALSE,
+            mode = "0777"
+        )
+    }
+
+    taskInSystemTimeVectorRR <- list(resultsRR[[6]], "Циклический алгоритм")
+    taskInSystemTimeVectorWRR <- list(resultsWRR[[6]], "Весовой циклический алгоритм")
+    taskInSystemTimeVectorRandom <- list(resultsRand[[6]], "Случайный алгоритм")
+    taskInSystemTimeVectorDRR <- list(resultsDW[[6]], "Алгоритм динамических весов")
+
+    for (algoritmData in list(taskInSystemTimeVectorRR,
+                              taskInSystemTimeVectorWRR,
+                              taskInSystemTimeVectorRandom,
+                              taskInSystemTimeVectorDRR
+    )) {
+        algorithm = algoritmData[[1]]
+        algorithmName = algoritmData[[2]]
+        img <- paste(resultsDirPath, algorithmName, ".png", sep = "")
+        png( file = img, width = 800, height = 600, res = 140 )
+        plot(
+            1:length(algorithm),
+            algorithm,
+            type = "n",
+            main = "Тенденция времени нахождения заявки в системе",
+            sub = paste("(", algorithmName, ")", sep = ""),
+            xlab = "Поступление заявок (время системы)",
+            ylab = "Время нахождения заявки в системе"
+        )
+        par(mar = c(2, 2, 2, 2), pin = c(5, 2))
+        points(
+            approx(1:length(algorithm), algorithm),
+            type = "l",
+            col = 1,
+            lwd = 2
+        )
+        abline(h = median(algorithm), col = "blue")
+        # abline(h = max(algorithm), col = "green")
+        abline(h = mean(algorithm), col = "red")
+        box(bty = "l")
+        dev.off()
+    }
+}
+
+if (TRUE) {
+    # Efficency of system
+    resultsPath <- "~/Downloads"
+    resultsDir <- "[results] efficency/"
+    efficencyForRR <- resultsRR[[10]]
+    efficencyForWRR <- resultsWRR[[10]]
+    efficencyForRand <- resultsRand[[10]]
+    efficencyForDW <- resultsDW[[10]]
+
+    resultsDirPath <- paste(resultsPath, resultsDir, sep = "/")
+    wholeEfficency <- c(efficencyForDW, efficencyForWRR, efficencyForRand, efficencyForDW)
+    if (!file.exists(resultsDirPath)) {
+        dir.create(
+            path = resultsDirPath,
+            showWarnings = TRUE,
+            recursive = FALSE,
+            mode = "0777"
+        )
+    }
+    # signif(wholeSystemEfficiency, 3)
+    dat <- c(resultsRR[[4]], resultsWRR[[4]], resultsRand[[4]], resultsDW[[4]])
+    img <- paste(resultsDirPath, "summary-efficency", ".png", sep = "")
+    png( file = img, width = 800, height = 600, res = 140 )
+    barplot(
+        height = wholeEfficency,
+        width = 3,
+        space = 0.2,
+        names.arg = c("Циклический", "Весовой", "Случайный", "Динамич.\nвесов"),
+        cex.names = 0.9,
+        main = "Эффективность системы",
+        density = c(1),
+        sub = "(Используется непрерывное равномерное распределение)",
+        xlab = "Используемые алгоритмы",
+        # ylim = c(0.0, 6.0),
+        ylab = "Эффективность системы"
+    )
+    box(bty = "l")
+    dev.off()
+}
 # Сделать эксперимент с меняющимися настройками сервера во времени
+
