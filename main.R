@@ -820,10 +820,10 @@ main <- function(inputFunc,
 
     if (TRUE) {
         cat("Balancing method:\t", balancingMethod, "\n")
-        cat("Working nodes count:\t", 3, "\n")
+        # cat("Working nodes count:\t", 3, "\n")
         cat("Input distribution:\t", distributionName, "\n")
-        cat("[xor with next] Transitions count:\t", transitionsCount, "\n")
-        cat("[xor with prev] Tasks count to perform:\t", tasksCount, "\n")
+        # cat("[xor with next] Transitions count:\t", transitionsCount, "\n")
+        # cat("[xor with prev] Tasks count to perform:\t", tasksCount, "\n")
         # header("System characteristics")
         # cat("Idle time for 1st working node", sum(idleTimeForWorkingNodes[[1]]), "\n")
         # cat("Idle time for 2nd working node", sum(idleTimeForWorkingNodes[[2]]), "\n")
@@ -889,12 +889,12 @@ main <- function(inputFunc,
             thirdNodeEfficiency <- 0
         }
         meanLoading = signif(median(c(median(firstNodeLoading), median(secondNodeLoading), median(thirdNodeLoading)) ), 3)
-        cat("Result system whole time: ", processTime, "\n")
-        wholeSystemEfficiency =  mean(c(firstNodeEfficiency, secondNodeEfficiency, thirdNodeEfficiency))
-        cat("Efficiency of whole system: ", signif(wholeSystemEfficiency, 3), "\n")
-        cat("Mean loading of whole system: ", meanLoading, "\n")
-        cat("Mean time of processing task in whole system:", mean(timeForCyclesVector), "\n")
-        cat("Rejected tasks in whole system:", rejectedTasks[[1]] + rejectedTasks[[2]] + rejectedTasks[[3]], "\n")
+        # cat("Result system whole time: ", processTime, "\n")
+        # wholeSystemEfficiency =  mean(c(firstNodeEfficiency, secondNodeEfficiency, thirdNodeEfficiency))
+        # cat("Efficiency of whole system: ", signif(wholeSystemEfficiency, 3), "\n")
+        # cat("Mean loading of whole system: ", meanLoading, "\n")
+        # cat("Mean time of processing task in whole system:", mean(timeForCyclesVector), "\n")
+        # cat("Rejected tasks in whole system:", rejectedTasks[[1]] + rejectedTasks[[2]] + rejectedTasks[[3]], "\n")
         cat(replicate(20, "="),"\n")
 
         # --- OUTPUT DATA ---
@@ -1067,32 +1067,64 @@ if (FALSE) {
 
 if (TRUE) {
     # Tasks and node loading
-    logRR <- list(resultsRR[[9]], "Циклический")
-    logWRR <- list(resultsWRR[[9]], "Весовой")
-    logRand <- list(resultsRand[[9]], "Случайный")
-    logDW <- list(resultsDW[[9]], "Динамический весовой")
-    methods <- list(logRR, logWRR, logRand, logDW)
-    for (algoritmData in methods) {
-        img <- paste("~/Downloads/", "tasks-and-loading", algoritmData[[2]], ".png", sep = "")
+    detailedNodesLogRR <- list(resultsRR[[9]], "Циклический алгоритм")
+    detailedNodesLogWRR <- list(resultsWRR[[9]], "Весовой алгоритм")
+    detailedNodesLogRand <- list(resultsRand[[9]], "Случайный алгоритм")
+    detailedNodesLogDW <- list(resultsDW[[9]], "Динамический весовой алгоритм")
+    logsToIterate <-
+        list(detailedNodesLogRR,
+             detailedNodesLogWRR,
+             detailedNodesLogRand,
+             detailedNodesLogDW)
+
+    resultsPath <- "~/Downloads"
+    resultsDir <- "tasks&Loadings"
+
+    resultsDirPath <- paste(resultsPath, resultsDir, sep = "/")
+
+    if (!file.exists(resultsDirPath)) {
+        dir.create(
+            path = resultsDirPath,
+            showWarnings = TRUE,
+            recursive = FALSE,
+            mode = "0777"
+        )
+    }
+
+    for (oneAlgorithmData in logsToIterate) {
+        img <- paste(
+            "~/Downloads/",
+            resultsDir,
+            oneAlgorithmData[[2]],
+            ".png",
+            sep = ""
+        )
+
+        methodData <- oneAlgorithmData[[1]]
+        methodName <- oneAlgorithmData[[2]]
+
+        tasksCount <- methodData[2,]
+        nodeLoading <- methodData[3,]
+        nodesInfo <- cbind(nodeLoading, tasksCount)
+
         # png( file = img, width = 800, height = 600, res = 140 )
-        tasksCount <- algoritmData[[1]][2,]
-        nodeLoading <- algoritmData[[1]][3,]
-        NodesInfo <- cbind(nodeLoading, tasksCount)
-        colnames(NodesInfo) <- c("Processed tasks", "Mean loading")
-        rownames(NodesInfo) <- c("1st node", "2st node", "3rd node")
+
+        colnames(nodesInfo) <- c("Processed tasks", "Mean loading")
+        rownames(nodesInfo) <- c("Узел №1", "Узел №2", "Узел №3")
         barplot(
-            height = t(NodesInfo),
+            height = t(nodesInfo),
             main = "Заявки и нагрузка на узлы кластера",
-            xlab = "Узлы РВС (Используется непрерывное равномерное распределение)",
-            col = c("white", "gray"),
+            xlab = "Узлы РВС (используется непрерывное равномерное распределение)",
+            col = c("lightgray", "darkgray"),
+            sub = methodName,
             beside = TRUE
         )
         legend(
             x = "bottomleft",
-            legend = c("Количество заявок", "Нагрузка"),
+            legend = c("Нагрузка", "Количество заявок"),
             bty = "o",
             text.width = 3,
-            col = c("white", "gray"),
+            col = c("lightgray", "darkgray"),
             lwd = 10
         )
         box(bty = "l")
