@@ -34,3 +34,5 @@ xx <- matrix(
     byrow = TRUE
 )
 result <- resolve(xx)
+ch <- c(1,2,3)
+print(c(ch , rev(ch)))

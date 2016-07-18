@@ -218,6 +218,7 @@ dynamicWeightAlgorithm <- function(systemHistory, scheduleList, number, defaultN
             nrow = 3,
             byrow = TRUE
         )
+        # performanceHistory = t(performanceHistory)
         # print(performanceHistory)
         optimalAssignment <- solve_LSAP(performanceHistory)
         # cat("\n")
@@ -225,7 +226,19 @@ dynamicWeightAlgorithm <- function(systemHistory, scheduleList, number, defaultN
         extractList <- function(it) { it[1] }
 
         scheduleList <- lapply(optimalAssignment, extractList)
-        scheduleList <- rev(scheduleList) # !!!
+        # scheduleList <- rev(scheduleList)
+        scheduleList <- c(
+            scheduleList[[1]],
+            scheduleList[[2]],
+            scheduleList[[1]],
+            scheduleList[[2]],
+            scheduleList[[1]],
+            scheduleList[[3]]
+        )
+        print(scheduleList)
+        print(scheduleList == c(3,2,3,2,3,1) || scheduleList == c(2,3,2,3,2,1))
+        # scheduleList <- c(3,2,3,2,3,1)
+        scheduleList <- c(1,3,2,3,2,1)
     }
 
     targetNode <- NA
@@ -519,6 +532,11 @@ performTransition <-
         lambda <- 0.1
         transitionTime <- 0.0
         currentPerformer <- NA
+
+        nodesState[[2]] <- nodesState[[2]] - nodesState[[2]] / 10
+        nodesState[[3]] <- nodesState[[3]] - nodesState[[3]] / 10
+        nodesState[[4]] <- nodesState[[4]] - nodesState[[4]] / 10
+
         if (transition == 1) {
             # Starting transition
             # Need to make a custom generator here in another words --
@@ -527,14 +545,13 @@ performTransition <-
         } else if (transition == 2) {
             # First node
             lambda <- firstNodePerf * taskWeight
-            # cat(transition + 1, ", ")
             nodesState[[transition]] <- nodesState[[transition]] + lambda
             if (nodesState[[transition]] >= firstNodeGap) {
                 # skip this task
                 rejectedTasks[[transition]] = rejectedTasks[[transition]] + 1
                 nodesState[[transition]] <- 0
             } else {
-                # nodesState[[transition]] <- nodesState[[transition]] / 10
+                # nodesState[[transition]] <-  nodesState[[transition]] - nodesState[[transition]] / 10
             }
             taskExcTime <- lambda
             currentPerformer <- transition
@@ -543,14 +560,13 @@ performTransition <-
             # Second node
             lambda <- secondNodePerf * taskWeight
 
-            # cat(transition + 1, ", ")
             nodesState[[transition]] <- nodesState[[transition]] + lambda
             if (nodesState[[transition]] >= secondNodeGap) {
                 # skip this task
                 rejectedTasks[[transition]] = rejectedTasks[[transition]] + 1
                 nodesState[[transition]] <- 0
             } else {
-                # nodesState[[transition]] <- nodesState[[transition]] / 10
+                # nodesState[[transition]] <-  nodesState[[transition]] - nodesState[[transition]] / 10
             }
             taskExcTime <- lambda
             currentPerformer <- transition
@@ -559,20 +575,18 @@ performTransition <-
             # Third node
             lambda <- thirdNodePerf * taskWeight
 
-            # cat(transition + 1, ", ")
             nodesState[[transition]] <- nodesState[[transition]] + lambda
             if (nodesState[[transition]] >= thirdNodeGap) {
                 # skip this task
                 rejectedTasks[[transition]] = rejectedTasks[[transition]] + 1
                 nodesState[[transition]] <- 0
             } else {
-                # nodesState[[transition]] <- nodesState[[transition]] / 10
+                # nodesState[[transition]] <- nodesState[[transition]] - nodesState[[transition]] / 10
             }
             taskExcTime <- lambda
             currentPerformer <- transition
             detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
         } else if (transition == 5) {
-            #
             lambda <- 0.1
         } else if (transition == 6) {
             lambda <- 0.1
@@ -894,7 +908,7 @@ main <- function(inputFunc,
         cat("Efficiency of whole system: ", signif(wholeSystemEfficiency, 3), "\n")
         # cat("Mean loading of whole system: ", meanLoading, "\n")
         # cat("Mean time of processing task in whole system:", mean(timeForCyclesVector), "\n")
-        # cat("Rejected tasks in whole system:", rejectedTasks[[1]] + rejectedTasks[[2]] + rejectedTasks[[3]], "\n")
+        cat("Rejected tasks in whole system:", rejectedTasks[[2]] + rejectedTasks[[3]] + rejectedTasks[[4]], "\n")
         cat(replicate(20, "="),"\n")
 
         # --- OUTPUT DATA ---
@@ -943,13 +957,14 @@ studD <- rt(1:20, df = Inf) # !
 
 transitionsCount <- 1000000
 nodesPerfs <- list(0.6, 0.3, 0.1)
-nodesGaps <- list(10, 100, 100)
+nodesGaps <- list(12, 15, 15)
 tasksCount <- 100
 # distributionName <- "непрерывное равномерное распределение"
 # distributionName <- "нормальное распределение"
 # distributionName <- "экспоненциальное распределение"
 distributionName <- "распределение Пуассона"
 
+poisD <- rpois(1:10, 15)
 perfDistribution <- c(
     14.617036, 23.499859, 15.674704, 10.719347, 7.892669, 8.942420, 40.888192,
     16.332921, 29.963656, 4.489176, 34.746372, 3.615892, 36.894031, 5.643181,
@@ -967,8 +982,8 @@ myPartialMain <- pryr::partial(
     M = startingMarks,
     transitionsCount = transitionsCount,
     tasksCount = tasksCount,
-    # distribution = perfDistribution,
-    distribution = poisD,
+    distribution = perfDistribution,
+    # distribution = poisD,
     distributionName = distributionName,
     nodesPerfs = nodesPerfs,
     nodesGaps = nodesGaps
@@ -981,7 +996,7 @@ resultsDW <- myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
 
 cat("\nDONE")
 
-if (FALSE) {
+if (TRUE) {
     # Rejected tasks
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] rejectedTasks/"
@@ -1002,12 +1017,12 @@ if (FALSE) {
         )
     }
     img <- paste(resultsDirPath, "rejected-tasks", ".png", sep = "")
-    png(file = img, width = 800, height = 600, res = 140)
+    # png(file = img, width = 800, height = 600, res = 140)
     dat <- c(rejTasksForRR, rejTasksForWRR, rejTasksForRand, rejTasksForDW)
     barplot(
         height = dat,
         width = 3,
-        space = 0.2,
+        space = 0.1,
         names.arg = c(
             "Циклический",
             "Весовой",
@@ -1023,7 +1038,7 @@ if (FALSE) {
         ylab = "Количество отброшенных заявок"
     )
     box(bty = "l")
-    dev.off()
+    # dev.off()
 }
 
 if (FALSE) {
