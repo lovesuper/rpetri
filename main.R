@@ -219,16 +219,21 @@ dynamicWeightAlgorithm <- function(systemHistory, scheduleList, number, defaultN
             byrow = TRUE
         )
         performanceHistory = t(performanceHistory)
-        optimalAssignment <- solve_LSAP(performanceHistory, maximum = FALSE)
+        optimalAssignment <- solve_LSAP(performanceHistory, maximum = TRUE)
+        optimalAssignment2 <- solve_LSAP(performanceHistory, maximum = FALSE)
         extractList <- function(it) { it[1] }
         scheduleList <- lapply(optimalAssignment, extractList)
-        # scheduleList <- rev(scheduleList)
-        # scheduleList <- rep(scheduleList, 2)
-        scheduleList <- c(scheduleList[[2]],
-                          scheduleList[[3]],
-                          scheduleList[[2]],
-                          scheduleList[[3]],
-                          scheduleList[[2]])
+        scheduleList2 <- lapply(optimalAssignment2, extractList)
+        # scheduleList <- rev(scheduleList
+        scheduleList <- rep(scheduleList, 2)
+        # c(unlist(scheduleList), unlist(scheduleList2))
+        # cat(res, "\n")
+        # scheduleList <- c(scheduleList[[2]],
+        #                   scheduleList[[3]],
+        #                   scheduleList[[2]],
+        #                   scheduleList[[3]],
+        #                   scheduleList[[1]]
+        #                   )
         # scheduleList <- c(2, 3, 2, 3, 1)
     }
 
@@ -524,9 +529,9 @@ performTransition <-
         transitionTime <- 0.0
         currentPerformer <- NA
 
-        nodesState[[2]] <- nodesState[[2]] - nodesState[[2]] / 8
-        nodesState[[3]] <- nodesState[[3]] - nodesState[[3]] / 8
-        nodesState[[4]] <- nodesState[[4]] - nodesState[[4]] / 8
+        nodesState[[2]] <- nodesState[[2]] * 0.7
+        nodesState[[3]] <- nodesState[[3]] * 0.7
+        nodesState[[4]] <- nodesState[[4]] * 0.7
 
         if (transition == 1) {
             # Starting transition
@@ -548,9 +553,9 @@ performTransition <-
             taskExcTime <- lambda
             currentPerformer <- transition
             # cat((per, "%\n\n")
-            detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda * 10))
-            # per <- round(nodesState[[transition]] * 100 / firstNodeGap, digits = 0)
-            # detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(per))
+            # detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
+            per <- round(nodesState[[transition]] * 100 / firstNodeGap, digits = 0)
+            detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(100 - per))
         } else if (transition == 3) {
             # Second node
             lambda <- secondNodePerf * taskWeight
@@ -565,9 +570,9 @@ performTransition <-
             }
             taskExcTime <- lambda
             currentPerformer <- transition
-            detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda * 10))
-            # per <- round(nodesState[[transition]] * 100 / secondNodeGap, digits = 0)
-            # detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(per))
+            # detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
+            per <- round(nodesState[[transition]] * 100 / secondNodeGap, digits = 0)
+            detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(100 - per))
         } else if (transition == 4) {
             # Third node
             lambda <- thirdNodePerf * taskWeight
@@ -582,9 +587,9 @@ performTransition <-
             }
             taskExcTime <- lambda
             currentPerformer <- transition
+            # detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
             per <- round(nodesState[[transition]] * 100 / thirdNodeGap, digits = 0)
-            # detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(per))
-            detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda * 10))
+            detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(100 - per))
         } else if (transition == 5) {
             lambda <- 0.1
         } else if (transition == 6) {
@@ -955,14 +960,13 @@ FD <- rf(1:20, df1 = 5, df2 = 2)
 studD <- rt(1:20, df = Inf) # !
 
 transitionsCount <- 1000000
-nodesPerfs <- list(0.2, 0.6, 0.1)
-nodesGaps <- list(12, 15, 10)
-# nodesGaps <- list(30, 25, 20) #2000
-tasksCount <- 200
+nodesPerfs <- list(0.1, 0.2, 0.4)
+nodesGaps <- list(3, 1, 2)
+tasksCount <- 1000
 # distributionName <- "непрерывное равномерное распределение"
-# distributionName <- "нормальное распределение"
+distributionName <- "нормальное распределение"
 # distributionName <- "экспоненциальное распределение"
-distributionName <- "распределение Пуассона"
+# distributionName <- "распределение Пуассона"
 
 perfDistribution <- c(
     14.617036, 23.499859, 15.674704, 10.719347, 7.892669, 8.942420, 40.888192,
@@ -974,7 +978,8 @@ perfDistribution <- c(
     45.007425, 3.539543, 4.235011, 2.501467, 19.954152, 31.347208, 6.746856, 9.348601
 )
 
-poisD <- rpois(1:1000, 30)
+# print(normD)
+
 myPartialMain <- pryr::partial(
     main,
     inputFunc = APlus,
@@ -983,9 +988,10 @@ myPartialMain <- pryr::partial(
     transitionsCount = transitionsCount,
     tasksCount = tasksCount,
     # distribution = perfDistribution,
-    distribution = poisD,
+    # distribution = poisD,
     # distribution = pexpD,
     # distribution = cuD,
+    distribution = unlist(lapply(normD, function(it) {it * 10})),
     # distribution = normD,
     distributionName = distributionName,
     nodesPerfs = nodesPerfs,

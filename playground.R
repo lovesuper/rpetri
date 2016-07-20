@@ -1,38 +1,14 @@
 require("clue")
 
-x <- matrix(c(5, 1, 4, 3, 5, 2, 2, 4, 4), nrow = 3)
 xx <- matrix(
-    c(3, 6, 0, 2,
-      0, 2, 0, 2,
-      19, 0, 4, 0,
-      0, 2, 6, 0),
-    ncol = 4,
-    nrow = 4,
-    byrow = TRUE
-)
-
-# Optimal assignment: 1 => 3, 2 => 1, 3 => 2, 4 => 4
-
-resolve <- function(matrix) {
-    solve_LSAP(matrix) # <- true resolving!!!
-
-    # print(lapply(a, f))
-    solve_LSAP(matrix, maximum = TRUE)
-
-    ## To get the optimal value (for now):
-    y <- solve_LSAP(matrix)
-    z <- sum(matrix[cbind(seq_along(y), y)])
-
-    return(z)
-}
-xx <- matrix(
-    c(2, 1, 1,
-      4, 2, 4,
-      1, 9, 4),
+    c(6, 4, 7,
+      2, 5, 8,
+      3, 6, 9),
     ncol = 3,
     nrow = 3,
     byrow = TRUE
 )
-result <- resolve(xx)
-ch <- c(1,2,3)
-print(c(ch , rev(ch)))
+y <- solve_LSAP(xx, maximum = TRUE)
+extractList <- function(it) { it[1] }
+t <- lapply(y, extractList)
+cat(unlist(t))
