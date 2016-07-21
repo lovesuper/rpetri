@@ -745,6 +745,7 @@ main <- function(inputFunc,
     nodesState <- list(0, 0, 0, 0, 0, 0, 0, 0, 0)
     rejectedTasks <- list(0, 0, 0, 0, 0, 0, 0, 0, 0)
     idleTimeForWorkingNodes <- list(c(), c(), c(), c(), c(), c(), c())
+    loadingForWorkingNodes <- list(c(), c(), c(), c(), c(), c(), c())
     currentPerformer <- NA
     # schedule list for DWRR
     scheduleList <- NULL
@@ -805,7 +806,9 @@ main <- function(inputFunc,
 
         startingVector <- createStartingVector(allowedTransitions)
         if (transitionNumber == nrow(commonFunc)) {
-            idleTimeForLoop <- timeForCycle - tail(detailedPerformanceLog[[currentPerformer - 1]], 1)
+            # LOADING
+            loadingForWorkingNodes[[currentPerformer - 1]] <- 100 - tail(detailedPerformanceLog[[currentPerformer - 1]], 1)
+            idleTimeForLoop <- timeForCycle - newLambda
             idleTimeForWorkingNodes[[currentPerformer - 1]] <- c(
                 idleTimeForWorkingNodes[[currentPerformer - 1]], idleTimeForLoop
             )
@@ -879,11 +882,11 @@ main <- function(inputFunc,
             thirdNode <- NULL
         }
 
-        firstNodeLoading <- calculate_loading(performanceLog[3, 1], sum(idleTimeForWorkingNodes[[1]]))
+        firstNodeLoading <- mean(loadingForWorkingNodes[[1]])
         # cat("Loading of first working node is", firstNodeLoading, "\n")
-        secondNodeLoading <- calculate_loading(performanceLog[3, 2], sum(idleTimeForWorkingNodes[[2]]))
+        secondNodeLoading <- mean(loadingForWorkingNodes[[2]])
         # cat("Loading of second working node is", secondNodeLoading, "\n")
-        thirdNodeLoading <- calculate_loading(performanceLog[3, 3], sum(idleTimeForWorkingNodes[[3]]))
+        thirdNodeLoading <- mean(loadingForWorkingNodes[[3]])
         # cat("Loading of third working node is", thirdNodeLoading, "\n")
         if (!is.null(firstNode)) {
             firstNodeEfficiency <- calculate_efficiency(performanceLog[3, 1], sum(idleTimeForWorkingNodes[[1]]))
@@ -905,11 +908,11 @@ main <- function(inputFunc,
         } else {
             thirdNodeEfficiency <- 0
         }
-        meanLoading = signif(median(c(median(firstNodeLoading), median(secondNodeLoading), median(thirdNodeLoading)) ), 3)
+        meanLoading = signif(median(c(firstNodeLoading, secondNodeLoading, thirdNodeLoading)), 3)
         # cat("Result system whole time: ", processTime, "\n")
         wholeSystemEfficiency =  mean(c(firstNodeEfficiency, secondNodeEfficiency, thirdNodeEfficiency))
-        cat("Efficiency of whole system: ", signif(wholeSystemEfficiency, 3), "\n")
-        # cat("Mean loading of whole system: ", meanLoading, "\n")
+        # cat("Efficiency of whole system: ", signif(wholeSystemEfficiency, 3), "\n")
+        cat("Mean loading of whole system: ", meanLoading, "\n")
         # cat("Mean time of processing task in whole system:", mean(timeForCyclesVector), "\n")
         cat("Rejected tasks in whole system:", rejectedTasks[[2]] + rejectedTasks[[3]] + rejectedTasks[[4]], "\n")
         cat(replicate(20, "="),"\n")
@@ -961,7 +964,7 @@ studD <- rt(1:20, df = Inf) # !
 transitionsCount <- 1000000
 nodesPerfs <- list(0.2, 0.3, 0.7)
 nodesGaps <- list(25, 18, 22)
-tasksCount <- 1000
+tasksCount <- 200
 # distributionName <- "непрерывное равномерное распределение"
 # distributionName <- "нормальное распределение"
 # distributionName <- "экспоненциальное распределение"
@@ -1003,7 +1006,7 @@ resultsDW <- myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
 
 cat("\nDONE")
 
-if (TRUE) {
+if (FALSE) {
     # Rejected tasks
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] rejectedTasks/"
@@ -1048,7 +1051,7 @@ if (TRUE) {
     # dev.off()
 }
 
-if (FALSE) {
+if (TRUE) {
     # Mean system loading
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] meanSysLoading/"
