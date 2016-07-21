@@ -223,18 +223,17 @@ dynamicWeightAlgorithm <- function(systemHistory, scheduleList, number, defaultN
         optimalAssignment2 <- solve_LSAP(performanceHistory, maximum = FALSE)
         extractList <- function(it) { it[1] }
         scheduleList <- lapply(optimalAssignment, extractList)
-        scheduleList2 <- lapply(optimalAssignment2, extractList)
-        # scheduleList <- rev(scheduleList
-        scheduleList <- rep(scheduleList, 2)
+        # scheduleList2 <- lapply(optimalAssignment2, extractList)
+        # scheduleList <- rev(scheduleList)
         # c(unlist(scheduleList), unlist(scheduleList2))
         # cat(res, "\n")
-        # scheduleList <- c(scheduleList[[2]],
-        #                   scheduleList[[3]],
-        #                   scheduleList[[2]],
-        #                   scheduleList[[3]],
-        #                   scheduleList[[1]]
-        #                   )
-        # scheduleList <- c(2, 3, 2, 3, 1)
+        scheduleList <- c(scheduleList[[1]],
+                          scheduleList[[2]],
+                          scheduleList[[1]],
+                          scheduleList[[3]]
+                          )
+        scheduleList <- rep(scheduleList, 2)
+        # scheduleList <- c(2, 1, 2, 3)
     }
 
     targetNode <- NA
@@ -960,14 +959,13 @@ FD <- rf(1:20, df1 = 5, df2 = 2)
 studD <- rt(1:20, df = Inf) # !
 
 transitionsCount <- 1000000
-nodesPerfs <- list(0.1, 0.2, 0.4)
-nodesGaps <- list(3, 1, 2)
+nodesPerfs <- list(0.2, 0.3, 0.7)
+nodesGaps <- list(25, 18, 22)
 tasksCount <- 1000
 # distributionName <- "непрерывное равномерное распределение"
-distributionName <- "нормальное распределение"
+# distributionName <- "нормальное распределение"
 # distributionName <- "экспоненциальное распределение"
-# distributionName <- "распределение Пуассона"
-
+distributionName <- "распределение Пуассона"
 perfDistribution <- c(
     14.617036, 23.499859, 15.674704, 10.719347, 7.892669, 8.942420, 40.888192,
     16.332921, 29.963656, 4.489176, 34.746372, 3.615892, 36.894031, 5.643181,
@@ -978,7 +976,7 @@ perfDistribution <- c(
     45.007425, 3.539543, 4.235011, 2.501467, 19.954152, 31.347208, 6.746856, 9.348601
 )
 
-# print(normD)
+print(poisD)
 
 myPartialMain <- pryr::partial(
     main,
@@ -988,10 +986,10 @@ myPartialMain <- pryr::partial(
     transitionsCount = transitionsCount,
     tasksCount = tasksCount,
     # distribution = perfDistribution,
-    # distribution = poisD,
-    # distribution = pexpD,
-    # distribution = cuD,
-    distribution = unlist(lapply(normD, function(it) {it * 10})),
+    distribution = poisD,
+    # distribution = unlist(lapply(pexpD, function(it) {it * 10})),
+    # distribution = unlist(lapply(cuD, function(it) {it * 10})),
+    # distribution = unlist(lapply(normD, function(it) {it * 10})),
     # distribution = normD,
     distributionName = distributionName,
     nodesPerfs = nodesPerfs,
