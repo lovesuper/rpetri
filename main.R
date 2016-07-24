@@ -963,8 +963,15 @@ studD <- rt(1:20, df = Inf) # !
 
 transitionsCount <- 1000000
 nodesPerfs <- list(0.2, 0.3, 0.7)
+# cuD
+# nodesGaps <- list(18, 17, 16)
+# normD
+# nodesGaps <- list(5, 5, 3)
+# ExpD
+# nodesGaps <- list(10, 9, 8)
+# Pois
 nodesGaps <- list(25, 18, 22)
-tasksCount <- 200
+tasksCount <- 1000
 # distributionName <- "непрерывное равномерное распределение"
 # distributionName <- "нормальное распределение"
 # distributionName <- "экспоненциальное распределение"
@@ -979,7 +986,7 @@ perfDistribution <- c(
     45.007425, 3.539543, 4.235011, 2.501467, 19.954152, 31.347208, 6.746856, 9.348601
 )
 
-print(poisD)
+print(unlist(lapply(normD, function(it) {it * 10})))
 
 myPartialMain <- pryr::partial(
     main,
@@ -988,12 +995,10 @@ myPartialMain <- pryr::partial(
     M = startingMarks,
     transitionsCount = transitionsCount,
     tasksCount = tasksCount,
-    # distribution = perfDistribution,
-    distribution = poisD,
-    # distribution = unlist(lapply(pexpD, function(it) {it * 10})),
     # distribution = unlist(lapply(cuD, function(it) {it * 10})),
     # distribution = unlist(lapply(normD, function(it) {it * 10})),
-    # distribution = normD,
+    # distribution = unlist(lapply(pexpD, function(it) {it * 10})),
+    distribution = poisD,
     distributionName = distributionName,
     nodesPerfs = nodesPerfs,
     nodesGaps = nodesGaps
@@ -1051,7 +1056,7 @@ if (FALSE) {
     # dev.off()
 }
 
-if (TRUE) {
+if (FALSE) {
     # Mean system loading
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] meanSysLoading/"
@@ -1136,12 +1141,12 @@ if (FALSE) {
         abline(h = median(algorithm), col = "blue")
         # abline(h = max(algorithm), col = "green")
         abline(h = mean(algorithm), col = "red")
-        box(bty = "l")
+        # box(bty = "l")
         dev.off()
     }
 }
 
-if (FALSE) {
+if (TRUE) {
     # Tasks and node loading
     detailedNodesLogRR <- list(resultsRR[[9]], "Циклический алгоритм")
     detailedNodesLogWRR <- list(resultsWRR[[9]], "Весовой алгоритм")
