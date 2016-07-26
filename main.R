@@ -232,7 +232,7 @@ dynamicWeightAlgorithm <- function(systemHistory, scheduleList, number, defaultN
                           scheduleList[[1]],
                           scheduleList[[3]]
                           )
-        scheduleList <- rep(scheduleList, 2)
+        # scheduleList <- rep(scheduleList, 2)
         # scheduleList <- c(2, 1, 2, 3)
     }
 
@@ -965,17 +965,18 @@ transitionsCount <- 1000000
 nodesPerfs <- list(0.2, 0.3, 0.7)
 # cuD
 # nodesGaps <- list(18, 17, 16)
+# nodesGaps <- list(15, 17, 16)
 # normD
-# nodesGaps <- list(5, 5, 3)
+nodesGaps <- list(5, 6, 5)
 # ExpD
 # nodesGaps <- list(10, 9, 8)
 # Pois
-nodesGaps <- list(25, 18, 22)
+# nodesGaps <- list(25, 18, 22)
 tasksCount <- 1000
 # distributionName <- "непрерывное равномерное распределение"
-# distributionName <- "нормальное распределение"
+distributionName <- "нормальное распределение"
 # distributionName <- "экспоненциальное распределение"
-distributionName <- "распределение Пуассона"
+# distributionName <- "распределение Пуассона"
 perfDistribution <- c(
     14.617036, 23.499859, 15.674704, 10.719347, 7.892669, 8.942420, 40.888192,
     16.332921, 29.963656, 4.489176, 34.746372, 3.615892, 36.894031, 5.643181,
@@ -996,9 +997,9 @@ myPartialMain <- pryr::partial(
     transitionsCount = transitionsCount,
     tasksCount = tasksCount,
     # distribution = unlist(lapply(cuD, function(it) {it * 10})),
-    # distribution = unlist(lapply(normD, function(it) {it * 10})),
+    distribution = unlist(lapply(normD, function(it) {it * 10})),
     # distribution = unlist(lapply(pexpD, function(it) {it * 10})),
-    distribution = poisD,
+    # distribution = poisD,
     distributionName = distributionName,
     nodesPerfs = nodesPerfs,
     nodesGaps = nodesGaps
@@ -1146,7 +1147,7 @@ if (FALSE) {
     }
 }
 
-if (TRUE) {
+if (FALSE) {
     # Tasks and node loading
     detailedNodesLogRR <- list(resultsRR[[9]], "Циклический алгоритм")
     detailedNodesLogWRR <- list(resultsWRR[[9]], "Весовой алгоритм")
@@ -1230,14 +1231,14 @@ if (FALSE) {
 
     resultData <- c(resultsRR[[5]], resultsWRR[[5]], resultsRand[[5]], resultsDW[[5]])
     img <- paste(resultsDirPath, "whole-time-working", ".png", sep = "")
-    png(file = img, width = 800, height = 600, res = 140)
+    # png(file = img, width = 800, height = 600, res = 140)
     barplot(
         height = resultData,
         width = 3,
         space = 0.2,
         names.arg = c("Циклический", "Весовой", "Случайный", "Динамич.\nвесов"),
         cex.names = 0.9,
-        main = "Время работы системы",
+        main = "Общее время работы системы",
         density = c(1),
         sub = paste("Используется ", distributionName, sep = ""),
         xlab = "Используемые алгоритмы",
@@ -1246,7 +1247,7 @@ if (FALSE) {
     )
     box(bty = "l")
 
-    dev.off()
+    # dev.off()
 }
 
 if (FALSE) {
@@ -1296,9 +1297,8 @@ if (FALSE) {
             lwd = 2
         )
         abline(h = median(algorithm), col = "blue")
-        # abline(h = max(algorithm), col = "green")
+        abline(h = max(algorithm), col = "green")
         abline(h = mean(algorithm), col = "red")
-        box(bty = "l")
         dev.off()
     }
 }
@@ -1342,7 +1342,7 @@ if (FALSE) {
     dev.off()
 }
 
-if (FALSE) {
+if (TRUE) {
     # Mean time for performing task in system
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] meanTaskTimeInSystem/"
@@ -1369,7 +1369,7 @@ if (FALSE) {
     }
 
     img <- paste(resultsDirPath, "mean-task-performing-in-system", ".png", sep = "")
-    png( file = img, width = 800, height = 600, res = 140 )
+    # png(file = img, width = 800, height = 600, res = 140)
     barplot(
         height = meanTaskTimes,
         width = 3,
@@ -1384,6 +1384,6 @@ if (FALSE) {
         ylab = "Среднее время нахождения заявки в системе"
     )
     box(bty = "l")
-    dev.off()
+    # dev.off()
 }
 # Сделать эксперимент с меняющимися настройками сервера во времени
