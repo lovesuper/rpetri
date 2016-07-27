@@ -66,7 +66,7 @@ AMinus = matrix(
 
 # Transitions that conflicted with each other
 conflictedTransitions = matrix(
-    c(0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0) ,
+    c(0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0),
     nrow = 13,
     ncol = 1,
     byrow = TRUE
@@ -133,7 +133,6 @@ pickNext <- function(range, number) {
 #' @examples
 roundRobin <- function(nodes, iteration) {
     pickNext(nodes, iteration)
-    # 3
 }
 
 # Weight Round Robin algorithm
@@ -162,7 +161,6 @@ pickByOrder <- function(orderedRange, number) {
 weightRoundRobin <- function(nodes, iteration) {
     pickByOrder(nodes, iteration)
 }
-
 
 # Implementations of algorithms for load balancing
 
@@ -466,7 +464,14 @@ getTransitionNumberWithResolving <- function(nodes, iteration, method, systemHis
     q <- 1
     if (all(nodes == conflictedTransitions)) {
         conflictedNodes <- getNodesIds(nodes)
-        transitionNumber <- resolveConflict(method, conflictedNodes, iteration, systemHistory, scheduleList)
+        transitionNumber <- resolveConflict(
+            method,
+            conflictedNodes,
+            iteration,
+            systemHistory,
+            scheduleList
+        )
+
         return(transitionNumber)
     }
 
@@ -474,6 +479,7 @@ getTransitionNumberWithResolving <- function(nodes, iteration, method, systemHis
         if ((q * nodes[i]) == 1) {
             transitionNumber <- i
         }
+
         if (nodes[i] > 0) {
             q <- 0
         }
@@ -540,6 +546,7 @@ performTransition <-
         thirdNodeGap <- nodesGaps[[3]]
         fourthNodeGap <- nodesGaps[[4]]
         fifthNodeGap <- nodesGaps[[5]]
+
         taskExcTime <- NULL
         lambda <- 0.1
         transitionTime <- 0.0
@@ -794,15 +801,15 @@ main <- function(inputFunc,
     commonFunc <- outputFunc - inputFunc
     performedTasksCount <- 0
     performanceLog <- matrix(c(0, 0, 0, 0, 0), nrow = 5, ncol = 1, byrow = TRUE)
-    detailedPerformanceLog <- list(c(), c(), c())
+    detailedPerformanceLog <- list(c(), c(), c(), c(), c())
     timeForCyclesVector <- c()
     processTime <- 0.0
     timeForCycle <- 0.0
     # may be used for nodesStatesVector !
     nodesState <- list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     rejectedTasks <- list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-    idleTimeForWorkingNodes <- list(c(), c(), c(), c(), c(), c(), c(), c(), c(), c())
-    loadingForWorkingNodes <- list(c(), c(), c(), c(), c(), c(), c(), c(), c(), c())
+    idleTimeForWorkingNodes <- list(c(), c(), c(), c(), c(), c(), c(), c(), c(), c(), c())
+    loadingForWorkingNodes <- list(c(), c(), c(), c(), c(), c(), c(), c(), c(), c(), c())
     currentPerformer <- NA
     # schedule list for DWRR
     scheduleList <- NULL
@@ -812,7 +819,14 @@ main <- function(inputFunc,
     for (i in 1:transitionsCount) {
         transposedVector <- t(M)
         allowedTransitions <- getAllowedTransitions(transposedVector, inputFunc)
-        result <- getTransitionNumberWithResolving(allowedTransitions, i, balancingMethod, detailedPerformanceLog, scheduleList)
+        result <- getTransitionNumberWithResolving(
+            allowedTransitions,
+            i,
+            balancingMethod,
+            detailedPerformanceLog,
+            scheduleList
+        )
+
         if (is.list(result)) {
             transitionNumber <- result$targetNode
             scheduleList <- result$scheduleList
@@ -962,9 +976,10 @@ main <- function(inputFunc,
         thirdNodeLoading <- mean(loadingForWorkingNodes[[3]])
         # cat("Loading of third working node is", thirdNodeLoading, "\n")
         fourthNodeLoading <- mean(loadingForWorkingNodes[[4]])
-        # cat("Loading of third working node is", fourthNodeLoading, "\n")
+        # cat("Loading of fourth working node is", fourthNodeLoading, "\n")
         fifthNodeLoading <- mean(loadingForWorkingNodes[[5]])
-        # cat("Loading of third working node is", fifthNodeLoading, "\n")
+        # cat("Loading of fifth working node is", fifthNodeLoading, "\n")
+
         if (!is.null(firstNode)) {
             firstNodeEfficiency <- calculate_efficiency(performanceLog[3, 1], sum(idleTimeForWorkingNodes[[1]]))
             # cat("Efficiency of first working node is", firstNodeEfficiency, "\n")
