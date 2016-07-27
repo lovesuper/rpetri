@@ -31,52 +31,44 @@ list <- structure(NA, class = "result")
 # A+ function
 APlus = matrix(
     c(
-        1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
-        0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
-    ), nrow = 13, ncol = 14, byrow = TRUE)
+        1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+        0, 1, 0, 0, 1, 0, 0, 0, 0, 0,
+        0, 1, 0, 0, 0, 0, 1, 0, 0, 0,
+        0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+    ), nrow = 9, ncol = 10, byrow = TRUE)
 
 # A- function
 AMinus = matrix(
     c(
-        0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-        0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-        1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    ), nrow = 13, ncol = 14, byrow = TRUE)
+        0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
+        0, 0, 1, 0, 0, 0, 0, 0, 1, 0,
+        0, 0, 0, 0, 1, 0, 0, 0, 1, 0,
+        0, 0, 0, 0, 0, 0, 1, 0, 1, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+        1, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    ), nrow = 9, ncol = 10, byrow = TRUE)
 
 # Transitions that conflicted with each other
 conflictedTransitions = matrix(
-    c(0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0) ,
-    nrow = 13,
+    c(0, 1, 1, 1, 0, 0, 0, 0, 0) ,
+    nrow = 9,
     ncol = 1,
     byrow = TRUE
 )
 
 # Started position of marks in the net
 startingMarks = matrix(
-    c(1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0),
+    c(1, 0, 1, 0, 1, 0, 1, 0, 0, 0),
     nrow = 1,
-    ncol = 14
+    ncol = 10
 )
 
 # Random algorithm
@@ -198,7 +190,7 @@ exoustedPickNext <- function(schedule) {
 
 algorithmSwitchStratege <- function(systemHistory) {
     for (i in 1:length(systemHistory)) {
-        if (length(systemHistory[[i]]) < 5) {
+        if (length(systemHistory[[i]]) < 3) {
             return(FALSE)
         }
     }
@@ -217,35 +209,29 @@ dynamicWeightAlgorithm <- function(systemHistory, scheduleList, number, defaultN
         f <- systemHistory[[1]]
         s <- systemHistory[[2]]
         t <- systemHistory[[3]]
-        f <- systemHistory[[4]]
-        fi <- systemHistory[[5]]
 
         performanceHistory <- matrix(
-            c(
-                tail(f, 3)[1], tail(f, 3)[2], tail(f, 3)[3],
-                tail(s, 3)[1], tail(s, 3)[2], tail(s, 3)[3],
-                tail(t, 3)[1], tail(t, 3)[2], tail(t, 3)[3],
-                tail(f, 4)[1], tail(f, 4)[2], tail(f, 4)[3],
-                tail(fi, 5)[1], tail(fi, 5)[2], tail(fi, 5)[3]
-            ),
-            ncol = 5,
-            nrow = 5,
+            c(tail(f, 3)[1], tail(f, 3)[2], tail(f, 3)[3],
+              tail(s, 3)[1], tail(s, 3)[2], tail(s, 3)[3],
+              tail(t, 3)[1], tail(t, 3)[2], tail(t, 3)[3]),
+            ncol = 3,
+            nrow = 3,
             byrow = TRUE
         )
         performanceHistory = t(performanceHistory)
         optimalAssignment <- solve_LSAP(performanceHistory, maximum = TRUE)
-        # optimalAssignment2 <- solve_LSAP(performanceHistory, maximum = FALSE)
+        optimalAssignment2 <- solve_LSAP(performanceHistory, maximum = FALSE)
         extractList <- function(it) { it[1] }
         scheduleList <- lapply(optimalAssignment, extractList)
         # scheduleList2 <- lapply(optimalAssignment2, extractList)
         # scheduleList <- rev(scheduleList)
         # c(unlist(scheduleList), unlist(scheduleList2))
         # cat(res, "\n")
-        # scheduleList <- c(scheduleList[[1]],
-        #                   scheduleList[[2]],
-        #                   scheduleList[[1]],
-        #                   scheduleList[[3]]
-        #                   )
+        scheduleList <- c(scheduleList[[1]],
+                          scheduleList[[2]],
+                          scheduleList[[1]],
+                          scheduleList[[3]]
+                          )
         # scheduleList <- rep(scheduleList, 2)
         # scheduleList <- c(2, 1, 2, 3)
     }
@@ -298,7 +284,7 @@ getAllowedTransitions <- function(currentState, inputFunc) {
     transposedInputFunc <- t(inputFunc)
     rowsCount <- nrow(inputFunc)
     colsCount <- ncol(inputFunc)
-    transposedMatrix <- matrix(NA, nrow = 13, ncol = 14)
+    transposedMatrix <- matrix(NA, nrow = 9, ncol = 10)
     transitionIndicatorVector <- vector('integer')
     for (ig in 1:rowsCount) {
         transposedMatrix[ig, ] <- t(transposedInputFunc[, ig])
@@ -440,7 +426,7 @@ resolveConflict <- function(method, nodes, iteration, systemHistory, scheduleLis
     } else if (method == "roundRobin") {
         roundRobin(nodes, iteration)
     } else if (method == "weightRoundRobin") {
-        weightRoundRobin(c(4, 2, 3, 5, 6), iteration)
+        weightRoundRobin(c(3,2,4), iteration)
     } else if (method == "leastConnectoins") {
         pickNodeWithLeastConnections()
     } else if (method == "dynamicWeightAlgorithm") {
@@ -466,7 +452,8 @@ getTransitionNumberWithResolving <- function(nodes, iteration, method, systemHis
     q <- 1
     if (all(nodes == conflictedTransitions)) {
         conflictedNodes <- getNodesIds(nodes)
-        transitionNumber <- resolveConflict(method, conflictedNodes, iteration, systemHistory, scheduleList)
+        transitionNumber <-
+            resolveConflict(method, conflictedNodes, iteration, systemHistory, scheduleList)
         return(transitionNumber)
     }
 
@@ -532,14 +519,10 @@ performTransition <-
         firstNodePerf <- nodesPerfs[[1]]
         secondNodePerf <- nodesPerfs[[2]]
         thirdNodePerf <- nodesPerfs[[3]]
-        fourthNodePerf <- nodesPerfs[[4]]
-        fifthNodePerf <- nodesPerfs[[5]]
 
         firstNodeGap <- nodesGaps[[1]]
         secondNodeGap <- nodesGaps[[2]]
         thirdNodeGap <- nodesGaps[[3]]
-        fourthNodeGap <- nodesGaps[[4]]
-        fifthNodeGap <- nodesGaps[[5]]
         taskExcTime <- NULL
         lambda <- 0.1
         transitionTime <- 0.0
@@ -548,8 +531,6 @@ performTransition <-
         nodesState[[2]] <- nodesState[[2]] * 0.7
         nodesState[[3]] <- nodesState[[3]] * 0.7
         nodesState[[4]] <- nodesState[[4]] * 0.7
-        nodesState[[5]] <- nodesState[[5]] * 0.7
-        nodesState[[6]] <- nodesState[[6]] * 0.7
 
         if (transition == 1) {
             # Starting transition
@@ -609,52 +590,14 @@ performTransition <-
             per <- round(nodesState[[transition]] * 100 / thirdNodeGap, digits = 0)
             detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(100 - per))
         } else if (transition == 5) {
-            # Fourth node
-            lambda <- fourthNodePerf * taskWeight
-
-            nodesState[[transition]] <- nodesState[[transition]] + lambda
-            if (nodesState[[transition]] >= fourthNodeGap) {
-                # skip this task
-                rejectedTasks[[transition]] = rejectedTasks[[transition]] + 1
-                nodesState[[transition]] <- 0
-            } else {
-                # nodesState[[transition]] <- nodesState[[transition]] - nodesState[[transition]] / 10
-            }
-            taskExcTime <- lambda
-            currentPerformer <- transition
-            # detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
-            per <- round(nodesState[[transition]] * 100 / fourthNodeGap, digits = 0)
-            detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(100 - per))
+            lambda <- 0.1
         } else if (transition == 6) {
-            # Fifth node
-            lambda <- fifthNodePerf * taskWeight
-
-            nodesState[[transition]] <- nodesState[[transition]] + lambda
-            if (nodesState[[transition]] >= fifthNodeGap) {
-                # skip this task
-                rejectedTasks[[transition]] = rejectedTasks[[transition]] + 1
-                nodesState[[transition]] <- 0
-            } else {
-                # nodesState[[transition]] <- nodesState[[transition]] - nodesState[[transition]] / 10
-            }
-            taskExcTime <- lambda
-            currentPerformer <- transition
-            # detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
-            per <- round(nodesState[[transition]] * 100 / fifthNodeGap, digits = 0)
-            detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(100 - per))
+            lambda <- 0.1
         } else if (transition == 7) {
             lambda <- 0.1
         } else if (transition == 8) {
             lambda <- 0.1
         } else if (transition == 9) {
-            lambda <- 0.1
-        } else if (transition == 10) {
-            lambda <- 0.1
-        } else if (transition == 11) {
-            lambda <- 0.1
-        } else if (transition == 12) {
-            lambda <- 0.1
-        } else if (transition == 13) {
             lambda <- 0.1
         }
 
@@ -675,7 +618,7 @@ performTransition <-
 #' @examples
 createStatsMatrix <- function(headerVector) {
     nodes <- getNodesIds(headerVector)
-    statsMatrix <- matrix(0, 5, length(nodes))
+    statsMatrix <- matrix(0, 3, length(nodes))
     for (k in 1:length(nodes)) {
         statsMatrix[1, k] <- t(nodes)[k]
     }
@@ -793,16 +736,16 @@ main <- function(inputFunc,
     # print(distribution)
     commonFunc <- outputFunc - inputFunc
     performedTasksCount <- 0
-    performanceLog <- matrix(c(0, 0, 0, 0, 0), nrow = 5, ncol = 1, byrow = TRUE)
+    performanceLog <- matrix(c(0, 0, 0), nrow = 3, ncol = 1, byrow = TRUE)
     detailedPerformanceLog <- list(c(), c(), c())
     timeForCyclesVector <- c()
     processTime <- 0.0
     timeForCycle <- 0.0
     # may be used for nodesStatesVector !
-    nodesState <- list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-    rejectedTasks <- list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-    idleTimeForWorkingNodes <- list(c(), c(), c(), c(), c(), c(), c(), c(), c(), c())
-    loadingForWorkingNodes <- list(c(), c(), c(), c(), c(), c(), c(), c(), c(), c())
+    nodesState <- list(0, 0, 0, 0, 0, 0, 0, 0, 0)
+    rejectedTasks <- list(0, 0, 0, 0, 0, 0, 0, 0, 0)
+    idleTimeForWorkingNodes <- list(c(), c(), c(), c(), c(), c(), c())
+    loadingForWorkingNodes <- list(c(), c(), c(), c(), c(), c(), c())
     currentPerformer <- NA
     # schedule list for DWRR
     scheduleList <- NULL
@@ -918,8 +861,6 @@ main <- function(inputFunc,
         firstNode <- detailedPerformanceLog[[1]]
         secondNode <- detailedPerformanceLog[[2]]
         thirdNode <- detailedPerformanceLog[[3]]
-        fourthNode <- detailedPerformanceLog[[4]]
-        fifthNode <- detailedPerformanceLog[[5]]
         if (!is.null(firstNode)) {
             # cat("Node 1 task performing mean time: ", signif(mean(firstNode), 3), "\n")
             # cat("Node 1 tasks performing median time: ", signif(median(firstNode), 3), "\n")
@@ -941,30 +882,12 @@ main <- function(inputFunc,
             thirdNode <- NULL
         }
 
-        if (!is.null(fourthNode)) {
-            # cat("Node 4 tasks performing mean time: ", signif(mean(fourthNode), 4), "\n")
-            # cat("Node 4 tasks performing median time: ", signif(median(fourthNode), 4), "\n")
-        } else {
-            fourthNode <- NULL
-        }
-
-        if (!is.null(fifthNode)) {
-            # cat("Node 5 tasks performing mean time: ", signif(mean(fifthNode), 5), "\n")
-            # cat("Node 5 tasks performing median time: ", signif(median(fifthNode), 5), "\n")
-        } else {
-            fifthNode <- NULL
-        }
-
         firstNodeLoading <- mean(loadingForWorkingNodes[[1]])
         # cat("Loading of first working node is", firstNodeLoading, "\n")
         secondNodeLoading <- mean(loadingForWorkingNodes[[2]])
         # cat("Loading of second working node is", secondNodeLoading, "\n")
         thirdNodeLoading <- mean(loadingForWorkingNodes[[3]])
         # cat("Loading of third working node is", thirdNodeLoading, "\n")
-        fourthNodeLoading <- mean(loadingForWorkingNodes[[4]])
-        # cat("Loading of third working node is", fourthNodeLoading, "\n")
-        fifthNodeLoading <- mean(loadingForWorkingNodes[[5]])
-        # cat("Loading of third working node is", fifthNodeLoading, "\n")
         if (!is.null(firstNode)) {
             firstNodeEfficiency <- calculate_efficiency(performanceLog[3, 1], sum(idleTimeForWorkingNodes[[1]]))
             # cat("Efficiency of first working node is", firstNodeEfficiency, "\n")
@@ -985,36 +908,13 @@ main <- function(inputFunc,
         } else {
             thirdNodeEfficiency <- 0
         }
-
-        if (!is.null(fourthNode)) {
-            fourthNodeEfficiency <- calculate_efficiency(performanceLog[3, 4], sum(idleTimeForWorkingNodes[[4]]))
-            # cat("Efficiency of fourth working node is", fourthNodeEfficiency, "\n")
-        } else {
-            fourthNodeEfficiency <- 0
-        }
-
-        if (!is.null(fifthNode)) {
-            fifthNodeEfficiency <- calculate_efficiency(performanceLog[3, 5], sum(idleTimeForWorkingNodes[[5]]))
-            # cat("Efficiency of fifth working node is", fifthNodeEfficiency, "\n")
-        } else {
-            fifthNodeEfficiency <- 0
-        }
-
-        meanLoading = signif(median(c(firstNodeLoading, secondNodeLoading, thirdNodeLoading, fourthNodeLoading, fifthNodeLoading)), 3)
+        meanLoading = signif(median(c(firstNodeLoading, secondNodeLoading, thirdNodeLoading)), 3)
         # cat("Result system whole time: ", processTime, "\n")
-        wholeSystemEfficiency =  mean(c(
-            firstNodeEfficiency,
-            secondNodeEfficiency,
-            thirdNodeEfficiency,
-            fourthNodeEfficiency,
-            fifthNodeEfficiency
-        ))
+        wholeSystemEfficiency =  mean(c(firstNodeEfficiency, secondNodeEfficiency, thirdNodeEfficiency))
         # cat("Efficiency of whole system: ", signif(wholeSystemEfficiency, 3), "\n")
         cat("Mean loading of whole system: ", meanLoading, "\n")
         # cat("Mean time of processing task in whole system:", mean(timeForCyclesVector), "\n")
-        cat("Rejected tasks in whole system:",
-            rejectedTasks[[2]] + rejectedTasks[[3]] + rejectedTasks[[4]] + rejectedTasks[[5]] + rejectedTasks[[6]],
-            "\n")
+        cat("Rejected tasks in whole system:", rejectedTasks[[2]] + rejectedTasks[[3]] + rejectedTasks[[4]], "\n")
         cat(replicate(20, "="),"\n")
 
         # --- OUTPUT DATA ---
@@ -1062,16 +962,16 @@ FD <- rf(1:20, df1 = 5, df2 = 2)
 studD <- rt(1:20, df = Inf) # !
 
 transitionsCount <- 1000000
-nodesPerfs <- list(0.2, 0.3, 0.7, 0.3, 0.5)
+nodesPerfs <- list(0.2, 0.3, 0.7)
 # cuD
-# nodesGaps <- list(18, 17, 16, 15, 14)
-# nodesGaps <- list(15, 17, 16, 16, 14)
+# nodesGaps <- list(18, 17, 16)
+# nodesGaps <- list(15, 17, 16)
 # normD
-nodesGaps <- list(5, 6, 5, 6, 5)
+nodesGaps <- list(5, 6, 5)
 # ExpD
-# nodesGaps <- list(10, 9, 8, 6, 10)
+# nodesGaps <- list(10, 9, 8)
 # Pois
-# nodesGaps <- list(25, 18, 22, 22, 20)
+# nodesGaps <- list(25, 18, 22)
 tasksCount <- 1000
 # distributionName <- "непрерывное равномерное распределение"
 distributionName <- "нормальное распределение"
@@ -1106,9 +1006,9 @@ myPartialMain <- pryr::partial(
 )
 
 resultsRR <- myPartialMain(balancingMethod = "roundRobin")
-# resultsWRR <- myPartialMain(balancingMethod = "weightRoundRobin")
-# resultsRand <- myPartialMain(balancingMethod = "random")
-# resultsDW <- myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
+resultsWRR <- myPartialMain(balancingMethod = "weightRoundRobin")
+resultsRand <- myPartialMain(balancingMethod = "random")
+resultsDW <- myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
 
 cat("\nDONE")
 
@@ -1117,10 +1017,10 @@ if (FALSE) {
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] rejectedTasks/"
 
-    rejTasksForRR <- resultsRR[[7]][[2]] + resultsRR[[7]][[3]] + resultsRR[[7]][[4]] + resultsRR[[7]][[5]] + resultsRR[[7]][[6]]
-    rejTasksForWRR <- resultsWRR[[7]][[2]] + resultsWRR[[7]][[3]] + resultsWRR[[7]][[4]] + resultsWRR[[7]][[5]] + resultsWRR[[7]][[6]]
-    rejTasksForRand <- resultsRand[[7]][[2]] + resultsRand[[7]][[3]] + resultsRand[[7]][[4]] + resultsRand[[7]][[5]] + resultsRand[[7]][[6]]
-    rejTasksForDW <- resultsDW[[7]][[2]] + resultsDW[[7]][[3]] + resultsDW[[7]][[4]] + resultsDW[[7]][[5]] + resultsDW[[7]][[6]]
+    rejTasksForRR <- resultsRR[[7]][[2]] + resultsRR[[7]][[3]] + resultsRR[[7]][[4]]
+    rejTasksForWRR <- resultsWRR[[7]][[2]] + resultsWRR[[7]][[3]] + resultsWRR[[7]][[4]]
+    rejTasksForRand <- resultsRand[[7]][[2]] + resultsRand[[7]][[3]] + resultsRand[[7]][[4]]
+    rejTasksForDW <- resultsDW[[7]][[2]] + resultsDW[[7]][[3]] + resultsDW[[7]][[4]]
 
     resultsDirPath <- paste(resultsPath, resultsDir, sep = "/")
 
@@ -1132,7 +1032,6 @@ if (FALSE) {
             mode = "0777"
         )
     }
-
     img <- paste(resultsDirPath, "rejected-tasks", ".png", sep = "")
     # png(file = img, width = 800, height = 600, res = 140)
     dat <- c(rejTasksForRR, rejTasksForWRR, rejTasksForRand, rejTasksForDW)
@@ -1292,7 +1191,7 @@ if (FALSE) {
         png(file = img, width = 800, height = 600, res = 140)
 
         colnames(nodesInfo) <- c("Processed tasks", "Mean loading")
-        rownames(nodesInfo) <- c("Узел №1", "Узел №2", "Узел №3", "Узел №4", "Узел №5")
+        rownames(nodesInfo) <- c("Узел №1", "Узел №2", "Узел №3")
         barplot(
             height = t(nodesInfo),
             main = "Заявки и нагрузка на узлы кластера",
@@ -1443,7 +1342,7 @@ if (FALSE) {
     dev.off()
 }
 
-if (FALSE) {
+if (TRUE) {
     # Mean time for performing task in system
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] meanTaskTimeInSystem/"
