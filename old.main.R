@@ -767,7 +767,7 @@ main <- function(inputFunc,
         if (ncol(performanceLog) == 1 && allowedTransitions == conflictedTransitions) {
             performanceLog = createStatsMatrix(allowedTransitions)
         }
-
+        cat(transitionNumber, "\n")
         for (m in 1:ncol(performanceLog)) {
             if (performanceLog[1, m] == transitionNumber) {
                 currentTaskWeight <- distribution[performedTasksCount %% length(distribution) + 1]
@@ -972,7 +972,7 @@ nodesGaps <- list(5, 6, 5)
 # nodesGaps <- list(10, 9, 8)
 # Pois
 # nodesGaps <- list(25, 18, 22)
-tasksCount <- 1000
+tasksCount <- 100
 # distributionName <- "непрерывное равномерное распределение"
 distributionName <- "нормальное распределение"
 # distributionName <- "экспоненциальное распределение"
@@ -1006,9 +1006,9 @@ myPartialMain <- pryr::partial(
 )
 
 resultsRR <- myPartialMain(balancingMethod = "roundRobin")
-resultsWRR <- myPartialMain(balancingMethod = "weightRoundRobin")
-resultsRand <- myPartialMain(balancingMethod = "random")
-resultsDW <- myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
+# resultsWRR <- myPartialMain(balancingMethod = "weightRoundRobin")
+# resultsRand <- myPartialMain(balancingMethod = "random")
+# resultsDW <- myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
 
 cat("\nDONE")
 

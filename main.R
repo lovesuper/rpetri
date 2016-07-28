@@ -55,11 +55,11 @@ AMinus = matrix(
         0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-        0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
+        0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+        0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0,
+        0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
         1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     ), nrow = 13, ncol = 14, byrow = TRUE)
@@ -560,7 +560,7 @@ performTransition <-
 
         if (transition == 1) {
             # Starting transition
-            # Need to make a custom generator here in another words --
+            # Needs to make a custom generator here in another words --
             # custom distribution
             lambda <- 0.1
         } else if (transition == 2) {
@@ -833,7 +833,6 @@ main <- function(inputFunc,
         } else {
             transitionNumber <- result
         }
-
         # Creating matrix for results
         if (ncol(performanceLog) == 1 && allowedTransitions == conflictedTransitions) {
             performanceLog = createStatsMatrix(allowedTransitions)
@@ -1121,9 +1120,9 @@ myPartialMain <- pryr::partial(
 )
 
 resultsRR <- myPartialMain(balancingMethod = "roundRobin")
-# resultsWRR <- myPartialMain(balancingMethod = "weightRoundRobin")
-# resultsRand <- myPartialMain(balancingMethod = "random")
-# resultsDW <- myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
+resultsWRR <- myPartialMain(balancingMethod = "weightRoundRobin")
+resultsRand <- myPartialMain(balancingMethod = "random")
+resultsDW <- myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
 
 cat("\nDONE")
 
@@ -1263,7 +1262,7 @@ if (FALSE) {
     }
 }
 
-if (FALSE) {
+if (TRUE) {
     # Tasks and node loading
     detailedNodesLogRR <- list(resultsRR[[9]], "Циклический алгоритм")
     detailedNodesLogWRR <- list(resultsWRR[[9]], "Весовой алгоритм")
@@ -1304,7 +1303,7 @@ if (FALSE) {
         nodeLoading <- methodData[3,]
         nodesInfo <- cbind(nodeLoading, tasksCount)
 
-        png(file = img, width = 800, height = 600, res = 140)
+        # png(file = img, width = 800, height = 600, res = 140)
 
         colnames(nodesInfo) <- c("Processed tasks", "Mean loading")
         rownames(nodesInfo) <- c("Узел №1", "Узел №2", "Узел №3", "Узел №4", "Узел №5")
@@ -1325,7 +1324,7 @@ if (FALSE) {
             lwd = 10
         )
         box(bty = "l")
-        dev.off()
+        # dev.off()
     }
 }
 
