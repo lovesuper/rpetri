@@ -432,11 +432,11 @@ getSystemCharacteristics <- function(timeOnOutput, idleTime, time1, time2, delta
 #' @export
 #'
 #' @examples
-resolveConflict <- function(method, nodes, iteration, systemHistory, scheduleList) {
+resolveConflict <- function(method, nodes, iteration, systemHistory, scheduleList, performedTasksCount) {
     if (method == "random") {
         randomBalancing(nodes)
     } else if (method == "roundRobin") {
-        roundRobin(nodes, iteration)
+        roundRobin(nodes, performedTasksCount)
     } else if (method == "weightRoundRobin") {
         weightRoundRobin(c(4, 2, 3, 5, 6), iteration)
     } else if (method == "leastConnectoins") {
@@ -459,7 +459,7 @@ resolveConflict <- function(method, nodes, iteration, systemHistory, scheduleLis
 #' @export
 #'
 #' @examples
-getTransitionNumberWithResolving <- function(nodes, iteration, method, systemHistory, scheduleList) {
+getTransitionNumberWithResolving <- function(nodes, iteration, method, systemHistory, scheduleList, performedTasksCount) {
     vectorLength <- length(nodes)
     q <- 1
     if (all(nodes == conflictedTransitions)) {
@@ -469,7 +469,8 @@ getTransitionNumberWithResolving <- function(nodes, iteration, method, systemHis
             conflictedNodes,
             iteration,
             systemHistory,
-            scheduleList
+            scheduleList,
+            performedTasksCount
         )
 
         return(transitionNumber)
@@ -824,7 +825,8 @@ main <- function(inputFunc,
             i,
             balancingMethod,
             detailedPerformanceLog,
-            scheduleList
+            scheduleList,
+            performedTasksCount
         )
 
         if (is.list(result)) {
@@ -1086,7 +1088,7 @@ nodesGaps <- list(5, 6, 5, 6, 5)
 # nodesGaps <- list(10, 9, 8, 6, 10)
 # Pois
 # nodesGaps <- list(25, 18, 22, 22, 20)
-tasksCount <- 1000
+tasksCount <- 50
 # distributionName <- "непрерывное равномерное распределение"
 distributionName <- "нормальное распределение"
 # distributionName <- "экспоненциальное распределение"
@@ -1119,10 +1121,15 @@ myPartialMain <- pryr::partial(
     nodesGaps = nodesGaps
 )
 
+# resultsRR <- myPartialMain(balancingMethod = "roundRobin")
+# resultsWRR <- myPartialMain(balancingMethod = "weightRoundRobin")
+# resultsRand <- myPartialMain(balancingMethod = "random")
+# resultsDW <- myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
+
 resultsRR <- myPartialMain(balancingMethod = "roundRobin")
-resultsWRR <- myPartialMain(balancingMethod = "weightRoundRobin")
-resultsRand <- myPartialMain(balancingMethod = "random")
-resultsDW <- myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
+resultsWRR <- myPartialMain(balancingMethod = "roundRobin")
+resultsRand <- myPartialMain(balancingMethod = "roundRobin")
+resultsDW <- myPartialMain(balancingMethod = "roundRobin")
 
 cat("\nDONE")
 
@@ -1319,7 +1326,7 @@ if (TRUE) {
             x = "bottomleft",
             legend = c("Нагрузка", "Количество заявок"),
             bty = "o",
-            text.width = 3,
+            text.width = 5,
             col = c("lightgray", "darkgray"),
             lwd = 10
         )
