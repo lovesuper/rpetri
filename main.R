@@ -438,11 +438,11 @@ resolveConflict <- function(method, nodes, iteration, systemHistory, scheduleLis
     } else if (method == "roundRobin") {
         roundRobin(nodes, performedTasksCount)
     } else if (method == "weightRoundRobin") {
-        weightRoundRobin(c(4, 2, 3, 5, 6), iteration)
+        weightRoundRobin(c(4, 2, 3, 5, 6), performedTasksCount)
     } else if (method == "leastConnectoins") {
         pickNodeWithLeastConnections()
     } else if (method == "dynamicWeightAlgorithm") {
-        dynamicWeightAlgorithm(systemHistory, scheduleList, iteration, nodes)
+        dynamicWeightAlgorithm(systemHistory, scheduleList, performedTasksCount, nodes)
     } else {
         cat("There is " %+% error("no") %+% " such balancing method: ", method)
         stop("Error")
@@ -1121,15 +1121,10 @@ myPartialMain <- pryr::partial(
     nodesGaps = nodesGaps
 )
 
-# resultsRR <- myPartialMain(balancingMethod = "roundRobin")
-# resultsWRR <- myPartialMain(balancingMethod = "weightRoundRobin")
-# resultsRand <- myPartialMain(balancingMethod = "random")
-# resultsDW <- myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
-
 resultsRR <- myPartialMain(balancingMethod = "roundRobin")
-resultsWRR <- myPartialMain(balancingMethod = "roundRobin")
-resultsRand <- myPartialMain(balancingMethod = "roundRobin")
-resultsDW <- myPartialMain(balancingMethod = "roundRobin")
+resultsWRR <- myPartialMain(balancingMethod = "weightRoundRobin")
+resultsRand <- myPartialMain(balancingMethod = "random")
+resultsDW <- myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
 
 cat("\nDONE")
 
@@ -1310,7 +1305,7 @@ if (TRUE) {
         nodeLoading <- methodData[3,]
         nodesInfo <- cbind(nodeLoading, tasksCount)
 
-        # png(file = img, width = 800, height = 600, res = 140)
+        png(file = img, width = 800, height = 600, res = 140)
 
         colnames(nodesInfo) <- c("Processed tasks", "Mean loading")
         rownames(nodesInfo) <- c("Узел №1", "Узел №2", "Узел №3", "Узел №4", "Узел №5")
@@ -1331,7 +1326,7 @@ if (TRUE) {
             lwd = 10
         )
         box(bty = "l")
-        # dev.off()
+        dev.off()
     }
 }
 
