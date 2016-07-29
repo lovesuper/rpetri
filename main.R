@@ -231,21 +231,26 @@ dynamicWeightAlgorithm <- function(systemHistory, scheduleList, number, defaultN
             byrow = TRUE
         )
         performanceHistory = t(performanceHistory)
-        optimalAssignment <- solve_LSAP(performanceHistory, maximum = TRUE)
-        # optimalAssignment2 <- solve_LSAP(performanceHistory, maximum = FALSE)
+
+        # optimalAssignment <- solve_LSAP(performanceHistory, maximum = TRUE)
+        optimalAssignment <- solve_LSAP(performanceHistory, maximum = FALSE)
+
         extractList <- function(it) { it[1] }
         scheduleList <- lapply(optimalAssignment, extractList)
+
         # scheduleList2 <- lapply(optimalAssignment2, extractList)
+
         # scheduleList <- rev(scheduleList)
+
         # c(unlist(scheduleList), unlist(scheduleList2))
-        # cat(res, "\n")
+
         # scheduleList <- c(scheduleList[[1]],
         #                   scheduleList[[2]],
         #                   scheduleList[[1]],
         #                   scheduleList[[3]]
         #                   )
+
         # scheduleList <- rep(scheduleList, 2)
-        # scheduleList <- c(2, 1, 2, 3)
     }
 
     targetNode <- NA
@@ -926,9 +931,11 @@ main <- function(inputFunc,
         # rownames(performanceLog) <- c("Transition", "Tasks count", "Loading")
         # print(performanceLog)
         # subheader("Rejected tasks per node")
-        # cat("Node 1 rejected", rejectedTasks[[2]], "tasks\n")
-        # cat("Node 2 rejected", rejectedTasks[[3]], "tasks\n")
-        # cat("Node 3 rejected", rejectedTasks[[4]], "tasks\n")
+        cat("Node 1 rejected", rejectedTasks[[2]], "tasks\n")
+        cat("Node 2 rejected", rejectedTasks[[3]], "tasks\n")
+        cat("Node 3 rejected", rejectedTasks[[4]], "tasks\n")
+        cat("Node 4 rejected", rejectedTasks[[5]], "tasks\n")
+        cat("Node 5 rejected", rejectedTasks[[6]], "tasks\n")
         # subheader("Tasks performing per node")
         firstNode <- detailedPerformanceLog[[1]]
         secondNode <- detailedPerformanceLog[[2]]
@@ -1067,6 +1074,8 @@ main <- function(inputFunc,
 
 # cat("\014") # Clear consosle output
 
+transitionsCount <- 1000000
+
 # INPUT DATA
 binomD <- rbinom(1:30, size = 40, prob = 1 / 6)
 poisD <- rpois(1:20, 24)
@@ -1077,23 +1086,21 @@ chiD <- rchisq(1:20, df = 7)
 FD <- rf(1:20, df1 = 5, df2 = 2)
 studD <- rt(1:20, df = Inf) # !
 
-transitionsCount <- 1000000
-nodesPerfs <- list(0.2, 0.3, 0.7, 0.3, 0.5)
+nodesPerfs <- list(0.6, 0.6, 0.6, 0.6, 0.6)
+
 # cuD
-# nodesGaps <- list(18, 17, 16, 15, 14)
-# nodesGaps <- list(15, 17, 16, 16, 14)
+nodesGaps <- list(15, 17, 16, 16, 14)
+
 # normD
-nodesGaps <- list(3, 4, 3, 3, 3)
+# nodesGaps <- list(1, 1, 2, 1, 2)
+
 # ExpD
 # nodesGaps <- list(10, 9, 8, 6, 10)
+
 # Pois
 # nodesGaps <- list(25, 18, 22, 22, 20)
-tasksCount <- 1000
-# distributionName <- "непрерывное равномерное распределение"
-distributionName <- "нормальное распределение"
-# distributionName <- "экспоненциальное распределение"
-# distributionName <- "распределение Пуассона"
-perfDistribution <- c(
+
+testDistribution <- c(
     14.617036, 23.499859, 15.674704, 10.719347, 7.892669, 8.942420, 40.888192,
     16.332921, 29.963656, 4.489176, 34.746372, 3.615892, 36.894031, 5.643181,
     3.785384, 43.331681, 29.505039, 7.454642, 27.730628, 41.550876, 10.137719,
@@ -1103,7 +1110,19 @@ perfDistribution <- c(
     45.007425, 3.539543, 4.235011, 2.501467, 19.954152, 31.347208, 6.746856, 9.348601
 )
 
-print(unlist(lapply(normD, function(it) {it * 10})))
+distributionName <- "непрерывное равномерное распределение"
+# distributionName <- "нормальное распределение"
+# distributionName <- "экспоненциальное распределение"
+# distributionName <- "распределение Пуассона"
+
+checkedDistribution <- unlist(lapply(cuD, function(it) {it * 10}))
+# checkedDistribution <- unlist(lapply(normD, function(it) {it * 10}))
+# checkedDistribution <- unlist(lapply(pexpD, function(it) {it * 10}))
+# checkedDistribution <- poisD
+
+print(checkedDistribution)
+
+tasksCount <- 100
 
 myPartialMain <- pryr::partial(
     main,
@@ -1112,10 +1131,7 @@ myPartialMain <- pryr::partial(
     M = startingMarks,
     transitionsCount = transitionsCount,
     tasksCount = tasksCount,
-    # distribution = unlist(lapply(cuD, function(it) {it * 10})),
-    distribution = unlist(lapply(normD, function(it) {it * 10})),
-    # distribution = unlist(lapply(pexpD, function(it) {it * 10})),
-    # distribution = poisD,
+    distribution = checkedDistribution,
     distributionName = distributionName,
     nodesPerfs = nodesPerfs,
     nodesGaps = nodesGaps
@@ -1126,48 +1142,50 @@ resultsWRR <- myPartialMain(balancingMethod = "weightRoundRobin")
 resultsRand <- myPartialMain(balancingMethod = "random")
 resultsDW <- myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
 
-cat("\nDONE")
+cat("\n[Excecution finished]")
 
-# Rejected tasks
-if (FALSE) {
-    resultsPath <- "~/Downloads"
-    resultsDir <- "[results] rejectedTasks/"
-
-    rejTasksForRR <- resultsRR[[7]][[2]] + resultsRR[[7]][[3]] + resultsRR[[7]][[4]] + resultsRR[[7]][[5]] + resultsRR[[7]][[6]]
-    rejTasksForWRR <- resultsWRR[[7]][[2]] + resultsWRR[[7]][[3]] + resultsWRR[[7]][[4]] + resultsWRR[[7]][[5]] + resultsWRR[[7]][[6]]
-    rejTasksForRand <- resultsRand[[7]][[2]] + resultsRand[[7]][[3]] + resultsRand[[7]][[4]] + resultsRand[[7]][[5]] + resultsRand[[7]][[6]]
-    rejTasksForDW <- resultsDW[[7]][[2]] + resultsDW[[7]][[3]] + resultsDW[[7]][[4]] + resultsDW[[7]][[5]] + resultsDW[[7]][[6]]
-
-    resultsDirPath <- paste(resultsPath, resultsDir, sep = "/")
-
-    if (!file.exists(resultsDirPath)) {
+resultsPath <- "~/Downloads"
+algorithmsNamesVectors <- c("Циклический", "Весовой", "Случайный", "Динамич.\nвесов")
+createDirIfNotExists <- function(dirName) {
+    if (!file.exists(dirName)) {
         dir.create(
-            path = resultsDirPath,
+            path = dirName,
             showWarnings = TRUE,
             recursive = FALSE,
             mode = "0777"
         )
     }
+    dirName
+}
+algorithmsInUseTitle <- "Используемые алгоритмы"
+distributionInUseTitle <- paste("Используется ", distributionName, sep = "")
+cat("\n[Working dir]:", resultsPath)
 
-    img <- paste(resultsDirPath, "rejected-tasks", ".png", sep = "")
-    # png(file = img, width = 800, height = 600, res = 140)
-    dat <- c(rejTasksForRR, rejTasksForWRR, rejTasksForRand, rejTasksForDW)
+# Rejected tasks
+if (TRUE) {
+    rejTasksForRR <- sum(unlist(resultsRR[[7]][1:5]))
+    rejTasksForWRR <- sum(unlist(resultsWRR[[7]][1:5]))
+    rejTasksForRand <- sum(unlist(resultsRand[[7]][1:5]))
+    rejTasksForDW <- sum(unlist(resultsDW[[7]][1:5]))
+    resultsDirPath <- createDirIfNotExists(
+        paste(resultsPath, "[results] rejectedTasks/", sep = "/")
+    )
+    # png(file = paste(resultsDirPath, "rejected-tasks", ".png", sep = ""),
+    #     width = 800,
+    #     height = 600,
+    #     res = 140)
+
+    rejectedData <- c(rejTasksForRR, rejTasksForWRR, rejTasksForRand, rejTasksForDW)
     barplot(
-        height = dat,
+        height = rejectedData,
         width = 3,
         space = 0.1,
-        names.arg = c(
-            "Циклический",
-            "Весовой",
-            "Случайный",
-            "Динамич.\nвесов"
-        ),
+        names.arg = algorithmsNamesVectors,
         cex.names = 0.9,
         main = "Отброшенные заявки",
         density = c(1),
-        sub = paste("Используется ", distributionName, sep = ""),
-        xlab = "Используемые алгоритмы",
-        # ylim = c(0.0, 6.0),
+        sub = distributionInUseTitle,
+        xlab = algorithmsInUseTitle,
         ylab = "Количество отброшенных заявок"
     )
     box(bty = "l")
@@ -1176,34 +1194,25 @@ if (FALSE) {
 
 # Mean system loading
 if (FALSE) {
-    resultsPath <- "~/Downloads"
-    resultsDir <- "[results] meanSysLoading/"
+    resultsDirPath <- createDirIfNotExists(paste(resultsPath, "[results] meanSysLoading/", sep = "/"))
+    systemLoadingData <- c(resultsRR[[4]], resultsWRR[[4]], resultsRand[[4]], resultsDW[[4]])
+    # png(
+    #     file = paste(resultsDirPath, "summary-mean-loading", ".png", sep = ""),
+    #     width = 800,
+    #     height = 600,
+    #     res = 140
+    # )
 
-    resultsDirPath <- paste(resultsPath, resultsDir, sep = "/")
-
-    if (!file.exists(resultsDirPath)) {
-        dir.create(
-            path = resultsDirPath,
-            showWarnings = TRUE,
-            recursive = FALSE,
-            mode = "0777"
-        )
-    }
-
-    dat <- c(resultsRR[[4]], resultsWRR[[4]], resultsRand[[4]], resultsDW[[4]])
-    img <- paste(resultsDirPath, "summary-mean-loading", ".png", sep = "")
-    # png( file = img, width = 800, height = 600, res = 140 )
     barplot(
-        height = dat,
+        height = systemLoadingData,
         width = 3,
         space = 0.2,
-        names.arg = c("Циклический", "Весовой", "Случайный", "Динамич.\nвесов"),
+        names.arg = algorithmsNamesVectors,
         cex.names = 0.9,
         main = "Средняя загруженность системы",
         density = c(1),
-        sub = paste("Используется ", distributionName, sep = ""),
-        xlab = "Используемые алгоритмы",
-        # ylim = c(0.0, 6.0),
+        sub = distributionInUseTitle,
+        xlab = algorithmsInUseTitle,
         ylab = "Средняя загруженность системы"
     )
     box(bty = "l")
@@ -1212,21 +1221,7 @@ if (FALSE) {
 
 # Task excecution times plot (combiled)
 if (FALSE) {
-    # Task excecution times plot (combiled)
-    resultsPath <- "~/Downloads"
-    resultsDir <- "[results] taskExcecutionTime/"
-
-    resultsDirPath <- paste(resultsPath, resultsDir, sep = "/")
-
-    if (!file.exists(resultsDirPath)) {
-        dir.create(
-            path = resultsDirPath,
-            showWarnings = TRUE,
-            recursive = FALSE,
-            mode = "0777"
-        )
-    }
-
+    resultsDirPath <- createDirIfNotExists(paste(resultsPath, "[results] taskExcecutionTime/", sep = "/"))
     tasksExcecutionTimeVectorRR <- list(resultsRR[[1]], "Циклический алгоритм")
     tasksExcecutionTimeVectorWRR <- list(resultsWRR[[1]], "Весовой циклический алгоритм")
     tasksExcecutionTimeVectorRandom <- list(resultsRand[[1]], "Случайный алгоритм")
@@ -1239,14 +1234,20 @@ if (FALSE) {
                        )) {
         algorithm = algoritmData[[1]]
         algorithmName = algoritmData[[2]]
-        img <- paste(resultsDirPath, algorithmName, ".png", sep = "")
-        png( file = img, width = 800, height = 600, res = 140 )
+
+        # png(
+        #     file = paste(resultsDirPath, algorithmName, ".png", sep = ""),
+        #     width = 800,
+        #     height = 600,
+        #     res = 140
+        # )
+
         plot(
             1:length(algorithm),
             algorithm,
             type = "n",
             main = paste("Тенденция времени выполнения заявок\n в узле-исполнителе (", algorithmName, ")", sep = ""),
-            sub = paste("Используется ", distributionName, sep = ""),
+            sub = distributionInUseTitle,
             xlab = "Время системы",
             ylab = "Время выполнения"
         )
@@ -1258,10 +1259,10 @@ if (FALSE) {
             lwd = 2
         )
         abline(h = median(algorithm), col = "blue")
-        # abline(h = max(algorithm), col = "green")
+        abline(h = max(algorithm), col = "green")
         abline(h = mean(algorithm), col = "red")
-        # box(bty = "l")
-        dev.off()
+
+        # dev.off()
     }
 }
 
@@ -1276,27 +1277,13 @@ if (FALSE) {
              detailedNodesLogWRR,
              detailedNodesLogRand,
              detailedNodesLogDW)
-
-    resultsPath <- "~/Downloads"
-    resultsDir <- "[results] tasks&Loadings/"
-
-    resultsDirPath <- paste(resultsPath, resultsDir, sep = "/")
-
-    if (!file.exists(resultsDirPath)) {
-        dir.create(
-            path = resultsDirPath,
-            showWarnings = TRUE,
-            recursive = FALSE,
-            mode = "0777"
-        )
-    }
-
+    resultsDirPath <- createDirIfNotExists(paste(resultsPath, "[results] tasks&Loadings/", sep = "/"))
     for (oneAlgorithmData in logsToIterate) {
-        img <- paste(
-            resultsDirPath,
-            oneAlgorithmData[[2]],
-            ".png",
-            sep = ""
+        png(
+            file = paste( resultsDirPath, oneAlgorithmData[[2]], ".png", sep = "" ),
+            width = 800,
+            height = 600,
+            res = 140
         )
 
         methodData <- oneAlgorithmData[[1]]
@@ -1304,9 +1291,8 @@ if (FALSE) {
 
         tasksCount <- methodData[2,]
         nodeLoading <- methodData[3,]
-        nodesInfo <- cbind(nodeLoading, tasksCount)
 
-        png(file = img, width = 800, height = 600, res = 140)
+        nodesInfo <- cbind(nodeLoading, tasksCount)
 
         colnames(nodesInfo) <- c("Processed tasks", "Mean loading")
         rownames(nodesInfo) <- c("Узел №1", "Узел №2", "Узел №3", "Узел №4", "Узел №5")
@@ -1315,7 +1301,7 @@ if (FALSE) {
             main = "Заявки и нагрузка на узлы кластера",
             xlab = paste("Узлы РВС (", methodName, ")", sep = ""),
             col = c("lightgray", "darkgray"),
-            sub = paste("Используется ", distributionName, sep = ""),
+            sub = distributionInUseTitle,
             beside = TRUE
         )
         legend(
@@ -1327,40 +1313,31 @@ if (FALSE) {
             lwd = 10
         )
         box(bty = "l")
-        dev.off()
+        # dev.off()
     }
 }
 
 # Whole time system working
 if (FALSE) {
-    resultsPath <- "~/Downloads"
-    resultsDir <- "[results] wholeSystemTime/"
+    resultsDirPath <- createDirIfNotExists(paste(resultsPath, "[results] wholeSystemTime/", sep = "/"))
+    wholeTimeWorkingData <- c(resultsRR[[5]], resultsWRR[[5]], resultsRand[[5]], resultsDW[[5]])
+    # png(
+    #     file = paste(resultsDirPath, "whole-time-working", ".png", sep = ""),
+    #     width = 800,
+    #     height = 600,
+    #     res = 140
+    # )
 
-    resultsDirPath <- paste(resultsPath, resultsDir, sep = "/")
-
-    if (!file.exists(resultsDirPath)) {
-        dir.create(
-            path = resultsDirPath,
-            showWarnings = TRUE,
-            recursive = FALSE,
-            mode = "0777"
-        )
-    }
-
-    resultData <- c(resultsRR[[5]], resultsWRR[[5]], resultsRand[[5]], resultsDW[[5]])
-    img <- paste(resultsDirPath, "whole-time-working", ".png", sep = "")
-    # png(file = img, width = 800, height = 600, res = 140)
     barplot(
-        height = resultData,
+        height = wholeTimeWorkingData,
         width = 3,
         space = 0.2,
-        names.arg = c("Циклический", "Весовой", "Случайный", "Динамич.\nвесов"),
+        names.arg = algorithmsNamesVectors,
         cex.names = 0.9,
         main = "Общее время работы системы",
         density = c(1),
-        sub = paste("Используется ", distributionName, sep = ""),
-        xlab = "Используемые алгоритмы",
-        # ylim = c(0.0, 6.0),
+        sub = distributionInUseTitle,
+        xlab = algorithmsInUseTitle,
         ylab = "Время работы системы"
     )
     box(bty = "l")
@@ -1370,40 +1347,32 @@ if (FALSE) {
 
 # Times of tasks being in system
 if (FALSE) {
-    resultsPath <- "~/Downloads"
-    resultsDir <- "[results] taskBeingInThaSystem/"
-
-    resultsDirPath <- paste(resultsPath, resultsDir, sep = "/")
-
-    if (!file.exists(resultsDirPath)) {
-        dir.create(
-            path = resultsDirPath,
-            showWarnings = TRUE,
-            recursive = FALSE,
-            mode = "0777"
-        )
-    }
-
+    resultsDirPath <- createDirIfNotExists(paste(resultsPath, "[results] taskBeingInThaSystem/", sep = "/"))
     taskInSystemTimeVectorRR <- list(resultsRR[[6]], "Циклический алгоритм")
     taskInSystemTimeVectorWRR <- list(resultsWRR[[6]], "Весовой циклический алгоритм")
     taskInSystemTimeVectorRandom <- list(resultsRand[[6]], "Случайный алгоритм")
     taskInSystemTimeVectorDRR <- list(resultsDW[[6]], "Алгоритм динамических весов")
-
-    for (algoritmData in list(taskInSystemTimeVectorRR,
-                              taskInSystemTimeVectorWRR,
-                              taskInSystemTimeVectorRandom,
-                              taskInSystemTimeVectorDRR
-    )) {
+    taskInSystemList <- list(
+        taskInSystemTimeVectorRR,
+        taskInSystemTimeVectorWRR,
+        taskInSystemTimeVectorRandom,
+        taskInSystemTimeVectorDRR
+    )
+    for (algoritmData in taskInSystemList) {
         algorithm = algoritmData[[1]]
         algorithmName = algoritmData[[2]]
-        img <- paste(resultsDirPath, algorithmName, ".png", sep = "")
-        png( file = img, width = 800, height = 600, res = 140 )
+        # png(
+        #     file = paste(resultsDirPath, algorithmName, ".png", sep = ""),
+        #     width = 800,
+        #     height = 600,
+        #     res = 140
+        # )
         plot(
             1:length(algorithm),
             algorithm,
             type = "n",
             main = paste("Тенденция времени нахождения заявки в системе\n (", algorithmName, ")", sep = ""),
-            sub = paste("Используется ", distributionName, sep = ""),
+            sub = distributionInUseTitle,
             xlab = "Поступление заявок (время системы)",
             ylab = "Время нахождения заявки в системе"
         )
@@ -1417,59 +1386,54 @@ if (FALSE) {
         abline(h = median(algorithm), col = "blue")
         abline(h = max(algorithm), col = "green")
         abline(h = mean(algorithm), col = "red")
-        dev.off()
+
+        # dev.off()
     }
 }
 
 # Efficency of system
 if (FALSE) {
-    resultsPath <- "~/Downloads"
-    resultsDir <- "[results] efficency/"
     efficencyForRR <- resultsRR[[10]]
     efficencyForWRR <- resultsWRR[[10]]
     efficencyForRand <- resultsRand[[10]]
     efficencyForDW <- resultsDW[[10]]
-
-    resultsDirPath <- paste(resultsPath, resultsDir, sep = "/")
+    resultsDirPath <- createDirIfNotExists(paste(resultsPath, "[results] efficency/", sep = "/"))
     wholeEfficency <- c(efficencyForDW, efficencyForWRR, efficencyForRand, efficencyForDW)
-    if (!file.exists(resultsDirPath)) {
-        dir.create(
-            path = resultsDirPath,
-            showWarnings = TRUE,
-            recursive = FALSE,
-            mode = "0777"
-        )
-    }
+
     # signif(wholeSystemEfficiency, 3)
-    img <- paste(resultsDirPath, "summary-efficency", ".png", sep = "")
-    png( file = img, width = 800, height = 600, res = 140 )
+
+    # png(
+    #     file = paste(resultsDirPath, "summary-efficency", ".png", sep = ""),
+    #     width = 800,
+    #     height = 600,
+    #     res = 140
+    # )
     barplot(
         height = wholeEfficency,
         width = 3,
         space = 0.2,
-        names.arg = c("Циклический", "Весовой", "Случайный", "Динамич.\nвесов"),
+        names.arg = algorithmsNamesVectors,
         cex.names = 0.9,
         main = "Эффективность системы",
         density = c(1),
-        sub = paste("Используется ", distributionName, sep = ""),
-        xlab = "Используемые алгоритмы",
-        # ylim = c(0.0, 6.0),
+        sub = distributionInUseTitle,
+        xlab = algorithmsInUseTitle,
         ylab = "Эффективность системы"
     )
     box(bty = "l")
-    dev.off()
+    # dev.off()
 }
 
 # Mean time for performing task in system
 if (FALSE) {
-    resultsPath <- "~/Downloads"
-    resultsDir <- "[results] meanTaskTimeInSystem/"
     taskInSystemTimeVectorRR <- resultsRR[[6]]
     taskInSystemTimeVectorWRR <- resultsWRR[[6]]
     taskInSystemTimeVectorRandom <- resultsRand[[6]]
     taskInSystemTimeVectorDRR <- resultsDW[[6]]
 
-    resultsDirPath <- paste(resultsPath, resultsDir, sep = "/")
+    resultsDirPath <- createDirIfNotExists(
+        paste(resultsPath, "[results] meanTaskTimeInSystem/", sep = "/")
+    )
     meanTaskTimes <- c(
         median(taskInSystemTimeVectorRR),
         median(taskInSystemTimeVectorWRR),
@@ -1477,31 +1441,27 @@ if (FALSE) {
         median(taskInSystemTimeVectorDRR)
     )
 
-    if (!file.exists(resultsDirPath)) {
-        dir.create(
-            path = resultsDirPath,
-            showWarnings = TRUE,
-            recursive = FALSE,
-            mode = "0777"
-        )
-    }
+    # png(
+    #     file = paste(resultsDirPath, "mean-task-performing-in-system", ".png", sep = ""),
+    #     width = 800,
+    #     height = 600,
+    #     res = 140
+    # )
 
-    img <- paste(resultsDirPath, "mean-task-performing-in-system", ".png", sep = "")
-    # png(file = img, width = 800, height = 600, res = 140)
     barplot(
         height = meanTaskTimes,
         width = 3,
         space = 0.2,
-        names.arg = c("Циклический", "Весовой", "Случайный", "Динамич.\nвесов"),
+        names.arg = algorithmsNamesVectors,
         cex.names = 0.9,
         main = "Среднее время нахождения заявки в системе",
         density = c(1),
-        sub = paste("Используется ", distributionName, sep = ""),
-        xlab = "Используемые алгоритмы",
-        # ylim = c(0.0, 6.0),
+        sub = distributionInUseTitle,
+        xlab = algorithmsInUseTitle,
         ylab = "Среднее время нахождения заявки в системе"
     )
     box(bty = "l")
+
     # dev.off()
 }
 
