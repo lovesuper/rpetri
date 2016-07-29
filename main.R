@@ -1083,12 +1083,12 @@ nodesPerfs <- list(0.2, 0.3, 0.7, 0.3, 0.5)
 # nodesGaps <- list(18, 17, 16, 15, 14)
 # nodesGaps <- list(15, 17, 16, 16, 14)
 # normD
-nodesGaps <- list(5, 6, 5, 6, 5)
+nodesGaps <- list(3, 4, 3, 3, 3)
 # ExpD
 # nodesGaps <- list(10, 9, 8, 6, 10)
 # Pois
 # nodesGaps <- list(25, 18, 22, 22, 20)
-tasksCount <- 50
+tasksCount <- 1000
 # distributionName <- "непрерывное равномерное распределение"
 distributionName <- "нормальное распределение"
 # distributionName <- "экспоненциальное распределение"
@@ -1128,8 +1128,8 @@ resultsDW <- myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
 
 cat("\nDONE")
 
+# Rejected tasks
 if (FALSE) {
-    # Rejected tasks
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] rejectedTasks/"
 
@@ -1174,8 +1174,8 @@ if (FALSE) {
     # dev.off()
 }
 
+# Mean system loading
 if (FALSE) {
-    # Mean system loading
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] meanSysLoading/"
 
@@ -1210,6 +1210,7 @@ if (FALSE) {
     # dev.off()
 }
 
+# Task excecution times plot (combiled)
 if (FALSE) {
     # Task excecution times plot (combiled)
     resultsPath <- "~/Downloads"
@@ -1264,8 +1265,8 @@ if (FALSE) {
     }
 }
 
-if (TRUE) {
-    # Tasks and node loading
+# Tasks and node loading
+if (FALSE) {
     detailedNodesLogRR <- list(resultsRR[[9]], "Циклический алгоритм")
     detailedNodesLogWRR <- list(resultsWRR[[9]], "Весовой алгоритм")
     detailedNodesLogRand <- list(resultsRand[[9]], "Случайный алгоритм")
@@ -1330,8 +1331,8 @@ if (TRUE) {
     }
 }
 
+# Whole time system working
 if (FALSE) {
-    # Whole time system working
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] wholeSystemTime/"
 
@@ -1367,8 +1368,8 @@ if (FALSE) {
     # dev.off()
 }
 
+# Times of tasks being in system
 if (FALSE) {
-    # Times of tasks being in system
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] taskBeingInThaSystem/"
 
@@ -1420,8 +1421,8 @@ if (FALSE) {
     }
 }
 
+# Efficency of system
 if (FALSE) {
-    # Efficency of system
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] efficency/"
     efficencyForRR <- resultsRR[[10]]
@@ -1459,8 +1460,8 @@ if (FALSE) {
     dev.off()
 }
 
+# Mean time for performing task in system
 if (FALSE) {
-    # Mean time for performing task in system
     resultsPath <- "~/Downloads"
     resultsDir <- "[results] meanTaskTimeInSystem/"
     taskInSystemTimeVectorRR <- resultsRR[[6]]
@@ -1503,4 +1504,5 @@ if (FALSE) {
     box(bty = "l")
     # dev.off()
 }
+
 # Сделать эксперимент с меняющимися настройками сервера во времени
