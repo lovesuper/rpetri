@@ -916,11 +916,6 @@ main <- function(inputFunc,
     }
 
     if (TRUE) {
-        cat("Balancing method:\t", balancingMethod, "\n")
-        # cat("Working nodes count:\t", 3, "\n")
-        cat("Input distribution:\t", distributionName, "\n")
-        # cat("[xor with next] Transitions count:\t", transitionsCount, "\n")
-        # cat("[xor with prev] Tasks count to perform:\t", tasksCount, "\n")
         # header("System characteristics")
         # cat("Idle time for 1st working node", sum(idleTimeForWorkingNodes[[1]]), "\n")
         # cat("Idle time for 2nd working node", sum(idleTimeForWorkingNodes[[2]]), "\n")
@@ -929,7 +924,6 @@ main <- function(inputFunc,
         # cat("Tasks performed in 2nd working node", performanceLog[2, 2], "(transition number:", performanceLog[1, 2], ")\n")
         # cat("Tasks performed in 3rd working node", performanceLog[2, 3], "(transition number:", performanceLog[1, 3], ")\n")
         # rownames(performanceLog) <- c("Transition", "Tasks count", "Loading")
-        # print(performanceLog)
         # subheader("Rejected tasks per node")
         cat("Node 1 rejected", rejectedTasks[[2]], "tasks\n")
         cat("Node 2 rejected", rejectedTasks[[3]], "tasks\n")
@@ -1038,7 +1032,7 @@ main <- function(inputFunc,
         cat("Rejected tasks in whole system:",
             rejectedTasks[[2]] + rejectedTasks[[3]] + rejectedTasks[[4]] + rejectedTasks[[5]] + rejectedTasks[[6]],
             "\n")
-        cat(replicate(20, "="),"\n")
+        cat(paste("====\t", balancingMethod, "\t====", sep = ""), "\n")
 
         # --- OUTPUT DATA ---
 
@@ -1110,17 +1104,15 @@ testDistribution <- c(
     45.007425, 3.539543, 4.235011, 2.501467, 19.954152, 31.347208, 6.746856, 9.348601
 )
 
-distributionName <- "непрерывное равномерное распределение"
-# distributionName <- "нормальное распределение"
-# distributionName <- "экспоненциальное распределение"
-# distributionName <- "распределение Пуассона"
+distributionName <- "Непрерывное равномерное распределение"
+# distributionName <- "Нормальное распределение (распределение Гаусса)"
+# distributionName <- "Экспоненциальное распределение"
+# distributionName <- "Распределение Пуассона"
 
 checkedDistribution <- unlist(lapply(cuD, function(it) {it * 10}))
 # checkedDistribution <- unlist(lapply(normD, function(it) {it * 10}))
 # checkedDistribution <- unlist(lapply(pexpD, function(it) {it * 10}))
 # checkedDistribution <- poisD
-
-print(checkedDistribution)
 
 tasksCount <- 100
 
@@ -1142,8 +1134,9 @@ resultsWRR <- myPartialMain(balancingMethod = "weightRoundRobin")
 resultsRand <- myPartialMain(balancingMethod = "random")
 resultsDW <- myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
 
-cat("\n[Excecution finished]")
+cat("\n[Excecution finished]\n")
 
+print(checkedDistribution)
 resultsPath <- "~/Downloads"
 algorithmsNamesVectors <- c("Циклический", "Весовой", "Случайный", "Динамич.\nвесов")
 createDirIfNotExists <- function(dirName) {
@@ -1160,8 +1153,12 @@ createDirIfNotExists <- function(dirName) {
 algorithmsInUseTitle <- "Используемые алгоритмы"
 distributionInUseTitle <- paste("Используется ", distributionName, sep = "")
 cat("\n[Working dir]:", resultsPath)
+cat("\n[Working nodes count]:", 5)
+cat("\n[Input distribution]: '", distributionName, "'\n", sep = "")
+cat("[Transitions count]:", as.integer(transitionsCount), "\n")
+cat("[Tasks count to perform]:", as.integer(tasksCount), "\n")
 
-# Rejected tasks
+# Rejected tasks (one barplot for rejected tasts in the system)
 if (TRUE) {
     rejTasksForRR <- sum(unlist(resultsRR[[7]][1:5]))
     rejTasksForWRR <- sum(unlist(resultsWRR[[7]][1:5]))
