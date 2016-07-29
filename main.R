@@ -1082,18 +1082,6 @@ studD <- rt(1:20, df = Inf) # !
 
 nodesPerfs <- list(0.6, 0.6, 0.6, 0.6, 0.6)
 
-# cuD
-nodesGaps <- list(15, 17, 16, 16, 14)
-
-# normD
-# nodesGaps <- list(1, 1, 2, 1, 2)
-
-# ExpD
-# nodesGaps <- list(10, 9, 8, 6, 10)
-
-# Pois
-# nodesGaps <- list(25, 18, 22, 22, 20)
-
 testDistribution <- c(
     14.617036, 23.499859, 15.674704, 10.719347, 7.892669, 8.942420, 40.888192,
     16.332921, 29.963656, 4.489176, 34.746372, 3.615892, 36.894031, 5.643181,
@@ -1104,18 +1092,25 @@ testDistribution <- c(
     45.007425, 3.539543, 4.235011, 2.501467, 19.954152, 31.347208, 6.746856, 9.348601
 )
 
-distributionName <- "Непрерывное равномерное распределение"
-# distributionName <- "Нормальное распределение (распределение Гаусса)"
-# distributionName <- "Экспоненциальное распределение"
-# distributionName <- "Распределение Пуассона"
 
+distributionName <- "Непрерывное равномерное распределение"
 checkedDistribution <- unlist(lapply(cuD, function(it) {it * 10}))
+nodesGaps <- list(15, 17, 16, 16, 14)
+
+# distributionName <- "Нормальное распределение (распределение Гаусса)"
 # checkedDistribution <- unlist(lapply(normD, function(it) {it * 10}))
+# nodesGaps <- list(1, 1, 2, 1, 2)
+
 # checkedDistribution <- unlist(lapply(pexpD, function(it) {it * 10}))
+# distributionName <- "Экспоненциальное распределение"
+# nodesGaps <- list(10, 9, 8, 6, 10)
+
 # checkedDistribution <- poisD
+# distributionName <- "Распределение Пуассона"
+# nodesGaps <- list(25, 18, 22, 22, 20)
+
 
 tasksCount <- 100
-
 myPartialMain <- pryr::partial(
     main,
     inputFunc = APlus,
@@ -1138,7 +1133,10 @@ cat("\n[Excecution finished]\n")
 
 print(checkedDistribution)
 resultsPath <- "~/Downloads"
-algorithmsNamesVectors <- c("Циклический", "Весовой", "Случайный", "Динамич.\nвесов")
+algorithmsNamesVectors <- c("Циклический",
+                            "Весовой",
+                            "Случайный",
+                            "Динамич.\nвесов")
 createDirIfNotExists <- function(dirName) {
     if (!file.exists(dirName)) {
         dir.create(
@@ -1158,35 +1156,42 @@ cat("\n[Input distribution]: '", distributionName, "'\n", sep = "")
 cat("[Transitions count]:", as.integer(transitionsCount), "\n")
 cat("[Tasks count to perform]:", as.integer(tasksCount), "\n")
 
-# Rejected tasks (one barplot for rejected tasts in the system)
+# Rejected tasks (one barplot for rejected tasks in the whole system)
 if (TRUE) {
     rejTasksForRR <- sum(unlist(resultsRR[[7]][1:5]))
     rejTasksForWRR <- sum(unlist(resultsWRR[[7]][1:5]))
     rejTasksForRand <- sum(unlist(resultsRand[[7]][1:5]))
     rejTasksForDW <- sum(unlist(resultsDW[[7]][1:5]))
     resultsDirPath <- createDirIfNotExists(
-        paste(resultsPath, "[results] rejectedTasks/", sep = "/")
+        paste(resultsPath,
+              "/[rpetri] Отброшенные заявки (", format(Sys.time(), "%a %d %b"),
+              ")/",
+              sep = "")
     )
-    # png(file = paste(resultsDirPath, "rejected-tasks", ".png", sep = ""),
-    #     width = 800,
-    #     height = 600,
-    #     res = 140)
+    png(file = paste(resultsDirPath,
+                     "Отброшенные заявки (", distributionName, ").png",
+                     sep = ""),
+        width = 500,
+        height = 500,
+        res = 80)
 
-    rejectedData <- c(rejTasksForRR, rejTasksForWRR, rejTasksForRand, rejTasksForDW)
+    rejectedData <- c(rejTasksForRR,
+                      rejTasksForWRR,
+                      rejTasksForRand,
+                      rejTasksForDW)
     barplot(
         height = rejectedData,
-        width = 3,
-        space = 0.1,
+        space = 0.3,
         names.arg = algorithmsNamesVectors,
-        cex.names = 0.9,
         main = "Отброшенные заявки",
-        density = c(1),
+        density = c(2),
         sub = distributionInUseTitle,
         xlab = algorithmsInUseTitle,
+        ylim = c(0,max(rejectedData) + max(rejectedData) * 0.40),
         ylab = "Количество отброшенных заявок"
     )
     box(bty = "l")
-    # dev.off()
+    dev.off()
 }
 
 # Mean system loading
