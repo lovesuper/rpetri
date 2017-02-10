@@ -231,9 +231,21 @@ dynamicWeightAlgorithm <- function(systemHistory, scheduleList, number, defaultN
             nrow = 5,
             byrow = TRUE
         )
+        isZeroInclusiveStep = FALSE
         performanceHistory = t(performanceHistory)
+        for (elem in performanceHistory) {
+            if (elem == 0) {
+                isZeroInclusiveStep = TRUE
+                break
+            }
+        }
+        if (isZeroInclusiveStep) {
+           print("Zero inclusive step")
+        } else {
+           print("Normal step")
+        }
 
-        print(performanceHistory)
+        # print(performanceHistory)
         # optimalAssignment <- solve_LSAP(performanceHistory, maximum = TRUE)
         optimalAssignment <- solve_LSAP(performanceHistory, maximum = FALSE)
 
