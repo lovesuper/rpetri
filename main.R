@@ -1,6 +1,7 @@
 #https://raw.githubusercontent.com/ggrothendieck/gsubfn/master/R/list.R
 library(crayon)
 require("clue")
+Sys.setlocale("LC_CTYPE", "en_GB.UTF-8")
 
 error <- red$bold
 
@@ -232,6 +233,7 @@ dynamicWeightAlgorithm <- function(systemHistory, scheduleList, number, defaultN
         )
         performanceHistory = t(performanceHistory)
 
+        print(performanceHistory)
         # optimalAssignment <- solve_LSAP(performanceHistory, maximum = TRUE)
         optimalAssignment <- solve_LSAP(performanceHistory, maximum = FALSE)
 
@@ -577,6 +579,7 @@ performTransition <-
                 # skip this task
                 rejectedTasks[[transition]] = rejectedTasks[[transition]] + 1
                 nodesState[[transition]] <- 0
+                lambda <- 0
                 # cat("FALLEN!\n")
             } else {
                 # nodesState[[transition]] <-  nodesState[[transition]] - nodesState[[transition]] / 10
@@ -584,9 +587,9 @@ performTransition <-
             taskExcTime <- lambda
             currentPerformer <- transition
             # cat((per, "%\n\n")
-            # detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
+            detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
             per <- round(nodesState[[transition]] * 100 / firstNodeGap, digits = 0)
-            detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(100 - per))
+            # detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(100 - per))
         } else if (transition == 3) {
             # Second node
             lambda <- secondNodePerf * taskWeight
@@ -596,14 +599,15 @@ performTransition <-
                 # skip this task
                 rejectedTasks[[transition]] = rejectedTasks[[transition]] + 1
                 nodesState[[transition]] <- 0
+                lambda <- 0
             } else {
                 # nodesState[[transition]] <-  nodesState[[transition]] - nodesState[[transition]] / 10
             }
             taskExcTime <- lambda
             currentPerformer <- transition
-            # detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
+            detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
             per <- round(nodesState[[transition]] * 100 / secondNodeGap, digits = 0)
-            detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(100 - per))
+            # detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(100 - per))
         } else if (transition == 4) {
             # Third node
             lambda <- thirdNodePerf * taskWeight
@@ -613,14 +617,15 @@ performTransition <-
                 # skip this task
                 rejectedTasks[[transition]] = rejectedTasks[[transition]] + 1
                 nodesState[[transition]] <- 0
+                lambda <- 0
             } else {
                 # nodesState[[transition]] <- nodesState[[transition]] - nodesState[[transition]] / 10
             }
             taskExcTime <- lambda
             currentPerformer <- transition
-            # detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
+            detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
             per <- round(nodesState[[transition]] * 100 / thirdNodeGap, digits = 0)
-            detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(100 - per))
+            # detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(100 - per))
         } else if (transition == 5) {
             # Fourth node
             lambda <- fourthNodePerf * taskWeight
@@ -630,14 +635,15 @@ performTransition <-
                 # skip this task
                 rejectedTasks[[transition]] = rejectedTasks[[transition]] + 1
                 nodesState[[transition]] <- 0
+                lambda <- 0
             } else {
                 # nodesState[[transition]] <- nodesState[[transition]] - nodesState[[transition]] / 10
             }
             taskExcTime <- lambda
             currentPerformer <- transition
-            # detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
+            detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
             per <- round(nodesState[[transition]] * 100 / fourthNodeGap, digits = 0)
-            detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(100 - per))
+            # detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(100 - per))
         } else if (transition == 6) {
             # Fifth node
             lambda <- fifthNodePerf * taskWeight
@@ -647,14 +653,15 @@ performTransition <-
                 # skip this task
                 rejectedTasks[[transition]] = rejectedTasks[[transition]] + 1
                 nodesState[[transition]] <- 0
+                lambda <- 0
             } else {
                 # nodesState[[transition]] <- nodesState[[transition]] - nodesState[[transition]] / 10
             }
             taskExcTime <- lambda
             currentPerformer <- transition
-            # detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
+            detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(lambda))
             per <- round(nodesState[[transition]] * 100 / fifthNodeGap, digits = 0)
-            detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(100 - per))
+            # detailedPerformanceLog[[transition - 1]] <- c(detailedPerformanceLog[[transition - 1]], c(100 - per))
         } else if (transition == 7) {
             lambda <- 0.1
         } else if (transition == 8) {
@@ -1093,9 +1100,9 @@ testDistribution <- c(
 )
 
 
-distributionName <- "Непрерывное равномерное распределение"
-checkedDistribution <- unlist(lapply(cuD, function(it) {it * 10}))
-nodesGaps <- list(15, 17, 16, 16, 14)
+# distributionName <- "Непрерывное равномерное распределение"
+# checkedDistribution <- unlist(lapply(cuD, function(it) {it * 10}))
+# nodesGaps <- list(15, 17, 16, 16, 14)
 
 # distributionName <- "Нормальное распределение (распределение Гаусса)"
 # checkedDistribution <- unlist(lapply(normD, function(it) {it * 10}))
@@ -1105,9 +1112,10 @@ nodesGaps <- list(15, 17, 16, 16, 14)
 # distributionName <- "Экспоненциальное распределение"
 # nodesGaps <- list(10, 9, 8, 6, 10)
 
-# checkedDistribution <- poisD
-# distributionName <- "Распределение Пуассона"
+checkedDistribution <- poisD
+distributionName <- "Распределение Пуассона"
 # nodesGaps <- list(25, 18, 22, 22, 20)
+nodesGaps <- list(25, 18, 22, 22, 20)
 
 
 tasksCount <- 100
