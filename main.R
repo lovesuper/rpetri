@@ -205,6 +205,8 @@ algorithmSwitchStratege <- function(systemHistory) {
     TRUE
 }
 
+zeroFrequencyList <- c()
+
 dynamicWeightAlgorithm <- function(systemHistory, scheduleList, number, defaultNodes) {
     # if we don't need to change strateg to Hungarian
     if (!algorithmSwitchStratege(systemHistory)) {
@@ -219,20 +221,23 @@ dynamicWeightAlgorithm <- function(systemHistory, scheduleList, number, defaultN
         f <- systemHistory[[4]]
         fi <- systemHistory[[5]]
 
-        performanceHistory <- matrix(
-            c(
+        o <-  c(
                 tail(f, 3)[1], tail(f, 3)[2], tail(f, 3)[3],
                 tail(s, 3)[1], tail(s, 3)[2], tail(s, 3)[3],
                 tail(t, 3)[1], tail(t, 3)[2], tail(t, 3)[3],
                 tail(f, 4)[1], tail(f, 4)[2], tail(f, 4)[3],
                 tail(fi, 5)[1], tail(fi, 5)[2], tail(fi, 5)[3]
-            ),
+            )
+        cat("vaiance:", var(o))
+        performanceHistory <- matrix(
+            o,
             ncol = 5,
             nrow = 5,
             byrow = TRUE
         )
         isZeroInclusiveStep = FALSE
         performanceHistory = t(performanceHistory)
+        print(performanceHistory)
         for (elem in performanceHistory) {
             if (elem == 0) {
                 isZeroInclusiveStep = TRUE
@@ -240,9 +245,11 @@ dynamicWeightAlgorithm <- function(systemHistory, scheduleList, number, defaultN
             }
         }
         if (isZeroInclusiveStep) {
-           print("Zero inclusive step")
+           # print("Zero inclusive step")
+           zeroFrequencyList <<- c(zeroFrequencyList, 1)
         } else {
-           print("Normal step")
+           zeroFrequencyList <<- c(zeroFrequencyList, 0)
+           # print("Normal step")
         }
 
         # print(performanceHistory)
@@ -1127,7 +1134,7 @@ testDistribution <- c(
 checkedDistribution <- poisD
 distributionName <- "Распределение Пуассона"
 # nodesGaps <- list(25, 18, 22, 22, 20)
-nodesGaps <- list(25, 18, 22, 22, 20)
+nodesGaps <- list(25, 22, 22, 22, 20)
 
 
 tasksCount <- 100
@@ -1149,6 +1156,8 @@ resultsWRR <- myPartialMain(balancingMethod = "weightRoundRobin")
 resultsRand <- myPartialMain(balancingMethod = "random")
 resultsDW <- myPartialMain(balancingMethod = "dynamicWeightAlgorithm")
 
+cat("\nzero")
+print(zeroFrequencyList)
 cat("\n[Excecution finished]\n")
 
 print(checkedDistribution)
