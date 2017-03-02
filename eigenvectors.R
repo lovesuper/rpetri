@@ -21,28 +21,27 @@ G <- matrix(
       0.000, 10.709, 11.901, 13.064, 0.09),
     nrow = 5, ncol = 5, byrow = TRUE)
 
-print("Matrix A values:")
-eigenvalsA <- eigen(A, only.values = TRUE)
-print(eigenvalsA)
+getRandomSquareMatrix <- function(x) {
+    matrix(
+        runif(x^2, 0, 10),
+        nrow = x,
+        ncol = x,
+        byrow = TRUE
+    )
+}
 
-print("Matrix G values and vectors:")
-eigen <- eigen(t(G))
-print(eigen)
-print("egenvec for first eigenval")
-vector <- eigen$vectors[, 1]
+calculateMatrixCoef <- function(m) {
+    eigenResult <- eigen(t(m))
+    firstVector <- eigenResult$vectors[, 1]
+    sumOfVector <- sum(firstVector)
+    f <- function(e) {
+        e / sumOfVector
+    }
+    lapply(firstVector, f)
+}
 
-print(vector)
-
-print("sum of values")
-
-s <- sum(vector[1], vector[2], vector[3], vector[4])
-
-print(s)
-print("first")
-print(vector[1] / s)
-print("second")
-print(vector[2] / s)
-print("third")
-print(vector[3] / s)
-print("fourth")
-print(vector[4] / s)
+result <- calculateMatrixCoef(
+    # getRandomSquareMatrix(5)
+    G
+    )
+print(result)
