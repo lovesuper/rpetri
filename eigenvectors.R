@@ -22,26 +22,37 @@ G <- matrix(
     nrow = 5, ncol = 5, byrow = TRUE)
 
 getRandomSquareMatrix <- function(x) {
-    matrix(
-        runif(x^2, 0, 10),
-        nrow = x,
-        ncol = x,
-        byrow = TRUE
+    fullyRandomX <-  runif(x^2, 0, 10)
+    A <- 0
+    B <- 1.0:9.99
+    L <- sapply(list(A, B), length)
+    fullyRandomX <- sample(c(A, B),
+                size = 20,
+                prob = rep(c(1/40, 1/2) / L, L),
+                replace = TRUE)
+    round(
+        matrix(fullyRandomX, nrow = x, ncol = x, byrow = TRUE),
+        digits = 3
     )
 }
 
 calculateMatrixCoef <- function(m) {
+    cat("Matrix is:\n"); print(m)
+
     eigenResult <- eigen(t(m))
     firstVector <- eigenResult$vectors[, 1]
     sumOfVector <- sum(firstVector)
+
     f <- function(e) {
-        e / sumOfVector
+        round(
+            Re(e / sumOfVector), digits = 3 # real part
+        )
     }
-    lapply(firstVector, f)
+    unlist(lapply(firstVector, f))
 }
 
 result <- calculateMatrixCoef(
-    # getRandomSquareMatrix(5)
-    G
+    getRandomSquareMatrix(5)
+    # G
     )
-print(result)
+cat("Eigenvector is:\n"); print(result)
