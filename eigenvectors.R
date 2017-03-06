@@ -1,18 +1,3 @@
-A <- matrix(
-    c(1.638, 2.590, 2.795, 3.180,
-      3.380, 5.347, 5.458, 5.584,
-      5.659, 0.000, 0.000, 0.000,
-      7.537, 8.217, 8.392, 10.082)
-    , nrow = 4, ncol = 4, byrow = TRUE)
-
-B <- matrix(
-    c(1.638, 2.590, 2.795, 3.180,
-      3.380, 5.347, 5.458, 5.584,
-      5.659, 0.000, 0.000, 0.000,
-      7.537, 8.217, 8.392, 10.082,
-      0.000, 10.709, 11.901, 13.064),
-    nrow = 5, ncol = 4, byrow = FALSE)
-
 G <- matrix(
     c(1.638, 2.590, 2.795, 3.180, 0.05,
       3.380, 5.347, 5.458, 5.584, 0.06,
@@ -37,22 +22,20 @@ getRandomSquareMatrix <- function(x) {
 }
 
 calculateMatrixCoef <- function(m) {
-    cat("Matrix is:\n"); print(m)
-
-    eigenResult <- eigen(t(m))
-    firstVector <- eigenResult$vectors[, 1]
-    sumOfVector <- sum(firstVector)
+    eigens <- eigen(t(m))
+    vector <- eigens$vectors[, 1]
+    sumOfVector <- sum(vector)
 
     f <- function(e) {
         round(
             Re(e / sumOfVector), digits = 3 # real part
         )
     }
-    unlist(lapply(firstVector, f))
+    unlist(lapply(vector, f))
 }
 
-result <- calculateMatrixCoef(
-    getRandomSquareMatrix(5)
-    # G
-    )
-cat("Eigenvector is:\n"); print(result)
+m <- getRandomSquareMatrix(5)
+cat("Matrix is:\n"); print(m)
+
+result <- calculateMatrixCoef(m)
+cat("Result is:\n"); print(result)
