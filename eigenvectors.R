@@ -1,3 +1,4 @@
+# Matrix for test
 G <- matrix(
     c(1.638, 2.590, 2.795, 3.180, 0.05,
       3.380, 5.347, 5.458, 5.584, 0.06,
@@ -29,7 +30,7 @@ calculateMatrixCoef <- function(m) {
     f <- function(e) {
         round(
             Re(e / sumOfVector), digits = 3 # real part
-        )
+        ) # some rounding for clearity
     }
     unlist(lapply(vector, f))
 }
